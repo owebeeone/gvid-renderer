@@ -157,6 +157,44 @@ class ResourceActionStatus(Enum):
     expired = 3
     unauthorized = 4
 
+class ExportProvenance(Enum):
+    governed_host = 1
+    standalone_import = 2
+
+class ExportSubmitStatus(Enum):
+    accepted = 1
+    stale_context = 2
+    invalid = 3
+    unauthorized = 4
+    unsupported = 5
+    capacity = 6
+    recovery_required = 7
+
+class ExportJobState(Enum):
+    queued = 1
+    preparing = 2
+    running = 3
+    verifying = 4
+    succeeded = 5
+    failed = 6
+    cancelled = 7
+    interrupted = 8
+
+class ExportEventKind(Enum):
+    ready = 1
+    state_change = 2
+    progress = 3
+    warning = 4
+    heartbeat = 5
+    recovery_required = 6
+
+class ExportCancelStatus(Enum):
+    accepted = 1
+    already_terminal = 2
+    unknown = 3
+    unauthorized = 4
+    stale_context = 5
+
 @dataclass(slots=True)
 class Rational:
     numerator: int
@@ -688,6 +726,105 @@ class ResourceActionAck:
     authority_incarnation_id: str
     action_id: str
     status: ResourceActionStatus
+
+@dataclass(slots=True)
+class ExportJobContext:
+    request_id: str
+    provenance: ExportProvenance
+    project_id: str
+    graph_id: str
+    sequence_id: str
+    authority_incarnation_id: str | None
+    local_import_id: str | None
+    accepted_revision: int
+    binding_set_id: str
+    binding_revision: int
+    profile_id: str
+    profile_version: int
+    profile_digest: str
+
+@dataclass(slots=True)
+class ExportJobRequest:
+    contract_version: int
+    context: ExportJobContext
+    range: TimeRange
+    destination_ref: str
+    allow_software_fallback: bool
+
+@dataclass(slots=True)
+class ExportJobAck:
+    contract_version: int
+    context: ExportJobContext
+    status: ExportSubmitStatus
+    job_id: str | None
+    replayed: bool
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
+class ExportProbeSummary:
+    video_stream_count: int
+    audio_stream_count: int
+    duration: Rational
+    width: int | None
+    height: int | None
+    audio_sample_rate: int | None
+    audio_channel_layout: str | None
+
+@dataclass(slots=True)
+class ExportResult:
+    export_record_id: str
+    output_artifact_id: str
+    probe_summary: ExportProbeSummary
+    output_probe_digest: str
+
+@dataclass(slots=True)
+class ExportJobEvent:
+    contract_version: int
+    context: ExportJobContext
+    job_id: str
+    event_sequence: int
+    first_available_sequence: int
+    kind: ExportEventKind
+    state: ExportJobState | None
+    progress: Rational | None
+    result: ExportResult | None
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
+class ExportStatusQuery:
+    contract_version: int
+    project_id: str
+    job_id: str
+    caller_incarnation_id: str | None
+    local_import_id: str | None
+
+@dataclass(slots=True)
+class ExportStatusSnapshot:
+    contract_version: int
+    context: ExportJobContext
+    job_id: str
+    state: ExportJobState
+    last_event_sequence: int
+    result: ExportResult | None
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
+class CancelExportJob:
+    contract_version: int
+    project_id: str
+    job_id: str
+    command_id: str
+    caller_incarnation_id: str | None
+    local_import_id: str | None
+
+@dataclass(slots=True)
+class ExportCancelAck:
+    contract_version: int
+    project_id: str
+    job_id: str
+    command_id: str
+    status: ExportCancelStatus
+    terminal_state: ExportJobState | None
 
 @dataclass(slots=True)
 class ProjectOpen:

@@ -1,6 +1,6 @@
 # GVid Renderer Requirements
 
-**Status:** Draft Taut v0.2 alignment; the preceding revision was accepted by [the renderer requirements review](render-requirements-ReviewDecision.md). The current design revision has no new review-loop verdict, as requested by the product owner.
+**Status:** Draft Taut v0.2 alignment; the preceding requirements revision was accepted by [the renderer requirements review](render-requirements-ReviewDecision.md). This amendment has not received its own requirements verdict; the render-engine design has a separate review loop.
 **Scope:** Portable edit graph, Taut graph/editor/catalog/binding/preview contracts, interactive rendering, and batch export in the gvid-renderer member
 **Source:** [Product and system requirements](../../dev-docs/gvid-requirements.md)
 **Related:** [High-level architecture](../../dev-docs/gvid-arch.md), [Taut v0.2 graph and service design](render-graph-schema-design.md), [render engine design](render-engine-design.md), [governed schema](../ir/gvid_render_graph.taut.py), [UI design v2](../../dev-docs/ui-design-v2.md), [Taut protocol](https://github.com/owebeeone/taut)

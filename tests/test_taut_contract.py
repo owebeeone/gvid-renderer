@@ -22,6 +22,9 @@ GOLDEN_SHA256 = {
     "ripple_insert_batch": ("EditBatch", "39ef319a92accd070e5f29f163ab8678ccf2a4020dfaf9a85fd78dc47cb913f0"),
     "insert_source_span": ("InsertSourceSpan", "4cff483f8ee8f66a6ef3777d72f04c6791c25cf12c5a31898a1b942c24b32e25"),
     "insert_new_asset": ("InsertSourceSpan", "cd73757f7e0681ccc4e7665adb90b635e099f07034e48846441a7d6c13364bf4"),
+    "export_job_request": ("ExportJobRequest", "58369f219704c4bd8e813411d1801733af999aa90e1b9628dadbc69709415887"),
+    "export_job_event": ("ExportJobEvent", "e9bfc9247e9ee5e82662e6fa10395b2a36e14981253592ee2634f6a07d728100"),
+    "cancel_export_job": ("CancelExportJob", "f5628b82f135ad562d0c361bb0bad9c48692be422b3dca61c2083208b720db9e"),
 }
 
 
@@ -253,6 +256,85 @@ class TautContractTest(unittest.TestCase):
             "status": "ready", "actual_time": source_request["at"],
             "resource": resource, "error_code": None, "diagnostic_id": None,
             "content_fingerprint": "sha256:different-bytes",
+        })
+
+    def test_export_job_wire_context_and_recovery_shapes(self) -> None:
+        host_context = {
+            "request_id": "export-a", "provenance": "governed_host",
+            "project_id": "p1", "graph_id": "g1", "sequence_id": "s1",
+            "authority_incarnation_id": "open-1", "local_import_id": None,
+            "accepted_revision": 9, "binding_set_id": "bind-2",
+            "binding_revision": 2, "profile_id": "web-h264",
+            "profile_version": 3, "profile_digest": "sha256:profile-v3",
+        }
+        other_context = {
+            **host_context, "request_id": "export-b", "accepted_revision": 8,
+            "binding_set_id": "bind-1", "binding_revision": 1,
+        }
+        local_context = {
+            **host_context, "request_id": "offline-a",
+            "provenance": "standalone_import",
+            "authority_incarnation_id": None, "local_import_id": "import-1",
+        }
+        for context in (host_context, other_context, local_context):
+            self.round_trip("ExportJobRequest", {
+                "contract_version": 1, "context": context,
+                "range": {"start": {"numerator": 0, "denominator": 1},
+                          "end": {"numerator": 2, "denominator": 1}},
+                "destination_ref": "opaque-destination-1",
+                "allow_software_fallback": True,
+            })
+        self.round_trip("ExportJobAck", {
+            "contract_version": 1, "context": host_context,
+            "status": "accepted", "job_id": "job-a",
+            "replayed": False, "diagnostic_id": None,
+        })
+        self.round_trip("ExportJobAck", {
+            "contract_version": 1, "context": host_context,
+            "status": "accepted", "job_id": "job-a",
+            "replayed": True, "diagnostic_id": None,
+        })
+        result = {
+            "export_record_id": "record-a", "output_artifact_id": "artifact-a",
+            "probe_summary": {
+                "video_stream_count": 1, "audio_stream_count": 1,
+                "duration": {"numerator": 2, "denominator": 1},
+                "width": 1280, "height": 720, "audio_sample_rate": 48000,
+                "audio_channel_layout": "stereo",
+            },
+            "output_probe_digest": "sha256:probe-a",
+        }
+        for sequence, kind, state, progress, event_result in (
+            (0, "ready", "queued", None, None),
+            (1, "progress", "running", {"numerator": 1, "denominator": 2}, None),
+            (2, "state_change", "succeeded", None, result),
+        ):
+            self.round_trip("ExportJobEvent", {
+                "contract_version": 1, "context": host_context,
+                "job_id": "job-a", "event_sequence": sequence,
+                "first_available_sequence": 0, "kind": kind,
+                "state": state, "progress": progress, "result": event_result,
+                "diagnostic_id": None,
+            })
+        self.round_trip("ExportStatusQuery", {
+            "contract_version": 1, "project_id": "p1", "job_id": "job-a",
+            "caller_incarnation_id": "open-2", "local_import_id": None,
+        })
+        self.round_trip("ExportStatusSnapshot", {
+            "contract_version": 1, "context": host_context,
+            "job_id": "job-a", "state": "succeeded",
+            "last_event_sequence": 2, "result": result,
+            "diagnostic_id": None,
+        })
+        self.round_trip("CancelExportJob", {
+            "contract_version": 1, "project_id": "p1", "job_id": "job-b",
+            "command_id": "cancel-b", "caller_incarnation_id": "open-1",
+            "local_import_id": None,
+        })
+        self.round_trip("ExportCancelAck", {
+            "contract_version": 1, "project_id": "p1", "job_id": "job-b",
+            "command_id": "cancel-b", "status": "accepted",
+            "terminal_state": None,
         })
 
 

@@ -24,6 +24,11 @@ export type PreviewStatus = "ready" | "cancelled" | "stale_graph" | "stale_bindi
 export type AuthorityState = "ready" | "read_only_future_version" | "recovery_required" | "closed";
 export type LeaseStatus = "granted" | "held_by_other" | "stale_incarnation" | "read_only" | "recovery_required";
 export type ResourceActionStatus = "accepted" | "unknown" | "expired" | "unauthorized";
+export type ExportProvenance = "governed_host" | "standalone_import";
+export type ExportSubmitStatus = "accepted" | "stale_context" | "invalid" | "unauthorized" | "unsupported" | "capacity" | "recovery_required";
+export type ExportJobState = "queued" | "preparing" | "running" | "verifying" | "succeeded" | "failed" | "cancelled" | "interrupted";
+export type ExportEventKind = "ready" | "state_change" | "progress" | "warning" | "heartbeat" | "recovery_required";
+export type ExportCancelStatus = "accepted" | "already_terminal" | "unknown" | "unauthorized" | "stale_context";
 
 export interface Rational {
   numerator: bigint;
@@ -555,6 +560,105 @@ export interface ResourceActionAck {
   authority_incarnation_id: string;
   action_id: string;
   status: ResourceActionStatus;
+}
+
+export interface ExportJobContext {
+  request_id: string;
+  provenance: ExportProvenance;
+  project_id: string;
+  graph_id: string;
+  sequence_id: string;
+  authority_incarnation_id: string | null;
+  local_import_id: string | null;
+  accepted_revision: bigint;
+  binding_set_id: string;
+  binding_revision: bigint;
+  profile_id: string;
+  profile_version: bigint;
+  profile_digest: string;
+}
+
+export interface ExportJobRequest {
+  contract_version: bigint;
+  context: ExportJobContext;
+  range: TimeRange;
+  destination_ref: string;
+  allow_software_fallback: boolean;
+}
+
+export interface ExportJobAck {
+  contract_version: bigint;
+  context: ExportJobContext;
+  status: ExportSubmitStatus;
+  job_id: string | null;
+  replayed: boolean;
+  diagnostic_id: string | null;
+}
+
+export interface ExportProbeSummary {
+  video_stream_count: bigint;
+  audio_stream_count: bigint;
+  duration: Rational;
+  width: bigint | null;
+  height: bigint | null;
+  audio_sample_rate: bigint | null;
+  audio_channel_layout: string | null;
+}
+
+export interface ExportResult {
+  export_record_id: string;
+  output_artifact_id: string;
+  probe_summary: ExportProbeSummary;
+  output_probe_digest: string;
+}
+
+export interface ExportJobEvent {
+  contract_version: bigint;
+  context: ExportJobContext;
+  job_id: string;
+  event_sequence: bigint;
+  first_available_sequence: bigint;
+  kind: ExportEventKind;
+  state: ExportJobState | null;
+  progress: Rational | null;
+  result: ExportResult | null;
+  diagnostic_id: string | null;
+}
+
+export interface ExportStatusQuery {
+  contract_version: bigint;
+  project_id: string;
+  job_id: string;
+  caller_incarnation_id: string | null;
+  local_import_id: string | null;
+}
+
+export interface ExportStatusSnapshot {
+  contract_version: bigint;
+  context: ExportJobContext;
+  job_id: string;
+  state: ExportJobState;
+  last_event_sequence: bigint;
+  result: ExportResult | null;
+  diagnostic_id: string | null;
+}
+
+export interface CancelExportJob {
+  contract_version: bigint;
+  project_id: string;
+  job_id: string;
+  command_id: string;
+  caller_incarnation_id: string | null;
+  local_import_id: string | null;
+}
+
+export interface ExportCancelAck {
+  contract_version: bigint;
+  project_id: string;
+  job_id: string;
+  command_id: string;
+  status: ExportCancelStatus;
+  terminal_state: ExportJobState | null;
 }
 
 export interface ProjectOpen {

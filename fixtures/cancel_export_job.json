@@ -1,0 +1,8 @@
+{
+  "contract_version": 1,
+  "project_id": "p1",
+  "job_id": "job-b",
+  "command_id": "cancel-b",
+  "caller_incarnation_id": "open-1",
+  "local_import_id": null
+}
