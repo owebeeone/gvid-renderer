@@ -3153,6 +3153,7 @@ pub struct ExportJobContext {
     pub profile_id: String,
     pub profile_version: i64,
     pub profile_digest: String,
+    pub owner_scope_id: Option<String>,
     pub wire_residual: Vec<(i64, Cbor)>,
 }
 impl ExportJobContext {
@@ -3173,6 +3174,7 @@ impl ExportJobContext {
             (11, Cbor::Text(self.profile_id.clone())),
             (12, Cbor::Int(self.profile_version)),
             (13, Cbor::Text(self.profile_digest.clone())),
+            (14, match &self.owner_scope_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
         ];
         for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
         Cbor::Map(m)
@@ -3192,7 +3194,8 @@ impl ExportJobContext {
             profile_id: c.try_get(11)?.try_text()?,
             profile_version: c.try_get(12)?.try_int()?,
             profile_digest: c.try_get(13)?.try_text()?,
-            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13)).map(|(t, v)| (*t, v.clone())).collect(),
+            owner_scope_id: { let v = c.try_get(14)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14)).map(|(t, v)| (*t, v.clone())).collect(),
         })
     }
     pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
@@ -3629,6 +3632,7 @@ pub struct ExportLookupQuery {
     pub request_id: String,
     pub caller_incarnation_id: Option<String>,
     pub local_import_id: Option<String>,
+    pub owner_scope_id: Option<String>,
     pub wire_residual: Vec<(i64, Cbor)>,
 }
 impl ExportLookupQuery {
@@ -3641,6 +3645,7 @@ impl ExportLookupQuery {
             (3, Cbor::Text(self.request_id.clone())),
             (4, match &self.caller_incarnation_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
             (5, match &self.local_import_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (6, match &self.owner_scope_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
         ];
         for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
         Cbor::Map(m)
@@ -3652,7 +3657,8 @@ impl ExportLookupQuery {
             request_id: c.try_get(3)?.try_text()?,
             caller_incarnation_id: { let v = c.try_get(4)?; if v.is_null() { None } else { Some(v.try_text()?) } },
             local_import_id: { let v = c.try_get(5)?; if v.is_null() { None } else { Some(v.try_text()?) } },
-            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5)).map(|(t, v)| (*t, v.clone())).collect(),
+            owner_scope_id: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6)).map(|(t, v)| (*t, v.clone())).collect(),
         })
     }
     pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
@@ -3668,6 +3674,7 @@ pub struct ExportLookupResult {
     pub status: ExportLookupStatus,
     pub snapshot: Option<ExportStatusSnapshot>,
     pub diagnostic_id: Option<String>,
+    pub owner_scope_id: Option<String>,
     pub wire_residual: Vec<(i64, Cbor)>,
 }
 impl ExportLookupResult {
@@ -3681,6 +3688,7 @@ impl ExportLookupResult {
             (4, Cbor::Int(self.status.wire())),
             (5, match &self.snapshot { Some(v) => v.to_cbor(), None => Cbor::Null }),
             (6, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (7, match &self.owner_scope_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
         ];
         for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
         Cbor::Map(m)
@@ -3693,7 +3701,8 @@ impl ExportLookupResult {
             status: ExportLookupStatus::from_wire(c.try_get(4)?.try_int()?)?,
             snapshot: { let v = c.try_get(5)?; if v.is_null() { None } else { Some(ExportStatusSnapshot::from_cbor(v)?) } },
             diagnostic_id: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(v.try_text()?) } },
-            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6)).map(|(t, v)| (*t, v.clone())).collect(),
+            owner_scope_id: { let v = c.try_get(7)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
         })
     }
     pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {

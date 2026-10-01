@@ -4,5 +4,6 @@
   "request_id": "export-a",
   "status": "retired_request",
   "snapshot": null,
-  "diagnostic_id": null
+  "diagnostic_id": null,
+  "owner_scope_id": "owner-a"
 }

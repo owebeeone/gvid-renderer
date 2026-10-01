@@ -14,6 +14,12 @@ from taut.wire import codec
 
 from ir.validate_baseline_graph import validate_baseline_graph
 from ir.validate_export_responses import validate_export_response
+from ir.validate_export_owner_scope import (
+    validate_export_job_context,
+    validate_export_lookup_echo,
+    validate_export_lookup_query,
+    validate_export_submit_denial,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "fixtures"
@@ -23,20 +29,23 @@ GOLDEN_SHA256 = {
     "ripple_insert_batch": ("EditBatch", "39ef319a92accd070e5f29f163ab8678ccf2a4020dfaf9a85fd78dc47cb913f0"),
     "insert_source_span": ("InsertSourceSpan", "4cff483f8ee8f66a6ef3777d72f04c6791c25cf12c5a31898a1b942c24b32e25"),
     "insert_new_asset": ("InsertSourceSpan", "cd73757f7e0681ccc4e7665adb90b635e099f07034e48846441a7d6c13364bf4"),
-    "export_job_request": ("ExportJobRequest", "eb2e9d01be0c6212f12fcedb9fd69177da3e309149af7bfe1fd46a21b4d16c2a"),
-    "export_job_event": ("ExportJobEvent", "ed4b8743f6bfaa40910c3b11bc1ac79497e4cf00ba636048bd8895942f12b985"),
+    "export_job_request_owner_b": ("ExportJobRequest", "926d943907f23ab5703ff46cdd6c65694a4dbd9b9d4d9e9291b3795dc298a4c7"),
+    "export_job_ack_scope_denied": ("ExportJobAck", "86a0f3176da45d626ec75cd1f8694b046c73165233cc189dc129f28838a38e2f"),
+    "export_lookup_query_owner_b": ("ExportLookupQuery", "cde5e192b8669ff85a882893d900c365e5430da1641fb10943e948128d8d61e6"),
+    "export_job_request": ("ExportJobRequest", "2d31d7ac85934f3c359183539189195da462b571555680244c62d6ce216abbe9"),
+    "export_job_event": ("ExportJobEvent", "a6c08298cd62768b92bbfa3be3f16dd39b01ed9f741b2dd7470de388a05a86a5"),
     "cancel_export_job": ("CancelExportJob", "f5628b82f135ad562d0c361bb0bad9c48692be422b3dca61c2083208b720db9e"),
-    "export_lookup_query": ("ExportLookupQuery", "6e0859ac33824e32ec7f1db297f77510e5dfd43f22bea258173212c9d8458565"),
-    "export_lookup_result": ("ExportLookupResult", "c573a0b96c91a5b73b9650206eee87208239f30496c4ebc9598376c998c29c53"),
-    "export_job_request_standalone": ("ExportJobRequest", "d26bd70b5f7488dd8626a4ebb243b7f45653ade049e62ad6e33fd32226de3dfe"),
-    "export_job_ack_retired": ("ExportJobAck", "a4eb254d6062b85609025f03b592baca4ed9ef0986486dac90fb66ef5acb696b"),
-    "export_lookup_query_standalone": ("ExportLookupQuery", "4bdfde9d79c7604be6048eeaefb880ab9195fcad71d3a583349eff014e3a855e"),
-    "export_lookup_retired": ("ExportLookupResult", "d8f1192749613482cf88a1a68c3af833d83f0d31424e9cca039f44b5df95aca0"),
+    "export_lookup_query": ("ExportLookupQuery", "7ed5eba4aeb4cf473d50d92f0fa75d274da2b7d71c06c6eaacb1cc18234cd3d5"),
+    "export_lookup_result": ("ExportLookupResult", "9d33062f9612664d6d8ffc4b8545b309e73ac9ebe05e39d7317b904936475837"),
+    "export_job_request_standalone": ("ExportJobRequest", "94a75d4dd972ce3ddada16da6f1c534095912c556e9826a644d44a3b3b0bda29"),
+    "export_job_ack_retired": ("ExportJobAck", "a3b2335b2ef71d4746f610bb4c82fe5a4a163d3755b8b5109ca67e3c756631c2"),
+    "export_lookup_query_standalone": ("ExportLookupQuery", "3153cd62a27906a61bad2e72070163216a51c55d11654f30441c71ec5d3f25cb"),
+    "export_lookup_retired": ("ExportLookupResult", "d8dc58efdbeec14be59ba00b5424c2250b9b82cc5d6bd27ae416239856e400d1"),
     "export_events_query_governed": ("ExportEventsQuery", "d04f18a5e214b45882b834240c52c9458fad9ad0cdcb4cc9c80fd51320ef4e3b"),
     "export_events_query_standalone": ("ExportEventsQuery", "0ed4a238080e0e58954f45b223fb6ebdff2b98c9331f29ae531c9b0b6fe13f14"),
-    "export_event_delivery_event": ("ExportEventDelivery", "aa337d33eb1d0a47d0ad65ff8cc6664b5150225a052050ae7af180bdf6a000a1"),
+    "export_event_delivery_event": ("ExportEventDelivery", "123354e30e41e85d2daf504d4f9b5e7da20352f3fa16d836ec9bd87cd817f4f7"),
     "export_event_delivery_unavailable": ("ExportEventDelivery", "6f782986058c7fc227d3e0946a53e684c2d5de06801a999b74de92a92703be00"),
-    "export_status_found": ("ExportStatusResult", "f1b7824fb28506510d721cba26b94373b732ffe3979ee58b8b4c6154983090e7"),
+    "export_status_found": ("ExportStatusResult", "b9fdae408674e1c3d841827bac114b8c38a7677e2081711f876680ecd9b67f59"),
     "export_status_unavailable": ("ExportStatusResult", "6f782986058c7fc227d3e0946a53e684c2d5de06801a999b74de92a92703be00"),
     "export_status_stale": ("ExportStatusResult", "61b4a5801a5e0285d14118d6632083fe9417375d3872857d37b47eb85a8cd8c6"),
     "export_cancel_unavailable": ("ExportCancelAck", "381a30d40eecc1729ef3b0c0f386cd864b428cce4405709453dc6a6b49b5aabf"),
@@ -276,6 +285,7 @@ class TautContractTest(unittest.TestCase):
     def test_export_job_wire_context_and_recovery_shapes(self) -> None:
         host_context = {
             "request_id": "export-a", "provenance": "governed_host",
+            "owner_scope_id": "owner-a",
             "project_id": "p1", "graph_id": "g1", "sequence_id": "s1",
             "authority_incarnation_id": "open-1", "local_import_id": None,
             "accepted_revision": 9, "binding_set_id": "bind-2",
@@ -290,8 +300,10 @@ class TautContractTest(unittest.TestCase):
             **host_context, "request_id": "offline-a",
             "provenance": "standalone_import",
             "authority_incarnation_id": None, "local_import_id": "import-1",
+            "owner_scope_id": None,
         }
         for context in (host_context, other_context, local_context):
+            validate_export_job_context(context)
             self.round_trip("ExportJobRequest", {
                 "contract_version": 1, "context": context,
                 "range": {"start": {"numerator": 0, "denominator": 1},
@@ -378,17 +390,19 @@ class TautContractTest(unittest.TestCase):
         self.round_trip("ExportLookupQuery", {
             "contract_version": 1, "project_id": "p1",
             "request_id": "export-a", "caller_incarnation_id": "open-2",
-            "local_import_id": None,
+            "local_import_id": None, "owner_scope_id": "owner-a",
         })
         self.round_trip("ExportLookupResult", {
             "contract_version": 1, "project_id": "p1",
             "request_id": "export-a", "status": "found",
             "snapshot": status_snapshot, "diagnostic_id": None,
+            "owner_scope_id": "owner-a",
         })
         self.round_trip("ExportLookupResult", {
             "contract_version": 1, "project_id": "p1",
             "request_id": "not-visible", "status": "unavailable",
             "snapshot": None, "diagnostic_id": None,
+            "owner_scope_id": "owner-a",
         })
         retired_ack = fixture("export_job_ack_retired")
         self.assertEqual(retired_ack["status"], "retired_request")
@@ -417,6 +431,52 @@ class TautContractTest(unittest.TestCase):
         self.assertEqual(unavailable_cancel["status"], "unavailable")
         self.assertIsNone(unavailable_cancel["terminal_state"])
         self.round_trip("ExportCancelAck", unavailable_cancel)
+
+    def test_export_owner_scope_contract(self) -> None:
+        owner_a = fixture("export_job_request")
+        owner_b = fixture("export_job_request_owner_b")
+        standalone = fixture("export_job_request_standalone")
+        self.assertEqual(owner_a["context"]["request_id"], owner_b["context"]["request_id"])
+        self.assertNotEqual(owner_a["context"]["owner_scope_id"], owner_b["context"]["owner_scope_id"])
+        for name, request in (("export_job_request", owner_a),
+                              ("export_job_request_owner_b", owner_b),
+                              ("export_job_request_standalone", standalone)):
+            with self.subTest(name=name):
+                validate_export_job_context(request["context"])
+                self.round_trip("ExportJobRequest", request)
+        self.assertIsNone(standalone["context"]["owner_scope_id"])
+        invalid = copy.deepcopy(owner_a["context"])
+        invalid["owner_scope_id"] = None
+        with self.assertRaisesRegex(ValueError, "owner scope"):
+            validate_export_job_context(invalid)
+        invalid = copy.deepcopy(standalone["context"])
+        invalid["owner_scope_id"] = "owner-a"
+        with self.assertRaisesRegex(ValueError, "forbids|without host owner"):
+            validate_export_job_context(invalid)
+
+        for name in ("export_lookup_query", "export_lookup_query_owner_b",
+                     "export_lookup_query_standalone"):
+            query = fixture(name)
+            validate_export_lookup_query(query)
+            self.round_trip("ExportLookupQuery", query)
+        query = fixture("export_lookup_query")
+        result = fixture("export_lookup_result")
+        validate_export_lookup_echo(query, result)
+        self.round_trip("ExportLookupResult", result)
+        mismatched = {**result, "owner_scope_id": "owner-b"}
+        with self.assertRaisesRegex(ValueError, "echo"):
+            validate_export_lookup_echo(query, mismatched)
+        invalid_query = {**query, "owner_scope_id": None}
+        with self.assertRaisesRegex(ValueError, "owner scope"):
+            validate_export_lookup_query(invalid_query)
+
+        denied = fixture("export_job_ack_scope_denied")
+        validate_export_submit_denial(denied)
+        self.round_trip("ExportJobAck", denied)
+        for change in ({"job_id": "job-a"}, {"diagnostic_id": "occupied"},
+                       {"replayed": True}):
+            with self.assertRaisesRegex(ValueError, "discloses job data"):
+                validate_export_submit_denial({**denied, **change})
 
     def test_export_negative_responses_carry_no_job_diagnostic(self) -> None:
         negative_cases = (

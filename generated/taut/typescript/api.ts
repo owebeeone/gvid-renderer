@@ -580,6 +580,7 @@ export interface ExportJobContext {
   profile_id: string;
   profile_version: bigint;
   profile_digest: string;
+  owner_scope_id: string | null;
 }
 
 export interface ExportJobRequest {
@@ -682,6 +683,7 @@ export interface ExportLookupQuery {
   request_id: string;
   caller_incarnation_id: string | null;
   local_import_id: string | null;
+  owner_scope_id: string | null;
 }
 
 export interface ExportLookupResult {
@@ -691,6 +693,7 @@ export interface ExportLookupResult {
   status: ExportLookupStatus;
   snapshot: ExportStatusSnapshot | null;
   diagnostic_id: string | null;
+  owner_scope_id: string | null;
 }
 
 export interface CancelExportJob {

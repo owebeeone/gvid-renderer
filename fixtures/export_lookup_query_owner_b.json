@@ -4,5 +4,5 @@
   "request_id": "export-a",
   "caller_incarnation_id": "open-2",
   "local_import_id": null,
-  "owner_scope_id": "owner-a"
+  "owner_scope_id": "owner-b"
 }

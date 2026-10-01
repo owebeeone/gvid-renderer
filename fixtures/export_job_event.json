@@ -13,7 +13,8 @@
     "binding_revision": 2,
     "profile_id": "web-h264",
     "profile_version": 3,
-    "profile_digest": "sha256:profile-v3"
+    "profile_digest": "sha256:profile-v3",
+    "owner_scope_id": "owner-a"
   },
   "job_id": "job-a",
   "event_sequence": 2,
@@ -27,7 +28,10 @@
     "probe_summary": {
       "video_stream_count": 1,
       "audio_stream_count": 1,
-      "duration": {"numerator": 2, "denominator": 1},
+      "duration": {
+        "numerator": 2,
+        "denominator": 1
+      },
       "width": 1280,
       "height": 720,
       "audio_sample_rate": 48000,

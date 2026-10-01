@@ -764,6 +764,7 @@ class ExportJobContext:
     profile_id: str
     profile_version: int
     profile_digest: str
+    owner_scope_id: str | None
 
 @dataclass(slots=True)
 class ExportJobRequest:
@@ -866,6 +867,7 @@ class ExportLookupQuery:
     request_id: str
     caller_incarnation_id: str | None
     local_import_id: str | None
+    owner_scope_id: str | None
 
 @dataclass(slots=True)
 class ExportLookupResult:
@@ -875,6 +877,7 @@ class ExportLookupResult:
     status: ExportLookupStatus
     snapshot: ExportStatusSnapshot | None
     diagnostic_id: str | None
+    owner_scope_id: str | None
 
 @dataclass(slots=True)
 class CancelExportJob:

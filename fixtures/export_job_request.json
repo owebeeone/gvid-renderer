@@ -13,11 +13,18 @@
     "binding_revision": 2,
     "profile_id": "web-h264",
     "profile_version": 3,
-    "profile_digest": "sha256:profile-v3"
+    "profile_digest": "sha256:profile-v3",
+    "owner_scope_id": "owner-a"
   },
   "range": {
-    "start": {"numerator": 0, "denominator": 1},
-    "end": {"numerator": 2, "denominator": 1}
+    "start": {
+      "numerator": 0,
+      "denominator": 1
+    },
+    "end": {
+      "numerator": 2,
+      "denominator": 1
+    }
   },
   "destination_ref": "opaque-destination-1",
   "allow_software_fallback": true,
