@@ -13,6 +13,7 @@ from taut.ir.validate import validate_or_raise
 from taut.wire import codec
 
 from ir.validate_baseline_graph import validate_baseline_graph
+from ir.validate_export_responses import validate_export_response
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "fixtures"
@@ -416,6 +417,32 @@ class TautContractTest(unittest.TestCase):
         self.assertEqual(unavailable_cancel["status"], "unavailable")
         self.assertIsNone(unavailable_cancel["terminal_state"])
         self.round_trip("ExportCancelAck", unavailable_cancel)
+
+    def test_export_negative_responses_carry_no_job_diagnostic(self) -> None:
+        negative_cases = (
+            ("ExportLookupResult", "export_lookup_retired", "snapshot"),
+            ("ExportStatusResult", "export_status_unavailable", "snapshot"),
+            ("ExportStatusResult", "export_status_stale", "snapshot"),
+            ("ExportEventDelivery", "export_event_delivery_unavailable", "event"),
+        )
+        for message, name, payload_field in negative_cases:
+            with self.subTest(name=name):
+                value = fixture(name)
+                validate_export_response(message, value)
+                self.round_trip(message, value)
+                with_diagnostic = {**value, "diagnostic_id": "job-exists"}
+                with self.assertRaisesRegex(ValueError, "discloses job data"):
+                    validate_export_response(message, with_diagnostic)
+                with_payload = {**value, payload_field: {"job_id": "hidden"}}
+                with self.assertRaisesRegex(ValueError, "discloses job data"):
+                    validate_export_response(message, with_payload)
+        for message, name in (
+            ("ExportLookupResult", "export_lookup_result"),
+            ("ExportStatusResult", "export_status_found"),
+            ("ExportEventDelivery", "export_event_delivery_event"),
+        ):
+            with self.subTest(name=name):
+                validate_export_response(message, fixture(name))
 
 
 if __name__ == "__main__":
