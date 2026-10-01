@@ -58,9 +58,13 @@ def validate_export_lookup_echo(query: dict[str, Any], result: dict[str, Any]) -
         raise ValueError("export lookup response does not echo query identity")
 
 
-def validate_export_submit_denial(ack: dict[str, Any]) -> None:
-    """Prevent an authorization denial from carrying an accepted-job hint."""
+def validate_export_submit_denial(request: dict[str, Any], ack: dict[str, Any]) -> None:
+    """Bind an authorization denial to its request without accepted-job hints."""
+    if not isinstance(request, dict) or not isinstance(request.get("context"), dict):
+        raise ValueError("export denial requires the originating request")
     if not isinstance(ack, dict) or ack.get("status") not in {"unauthorized", "stale_context"}:
         raise ValueError("expected export authorization denial")
+    if ack.get("contract_version") != request.get("contract_version") or ack.get("context") != request["context"]:
+        raise ValueError("export authorization denial does not echo request")
     if ack.get("job_id") is not None or ack.get("diagnostic_id") is not None or ack.get("replayed") is not False:
         raise ValueError("export authorization denial discloses job data")

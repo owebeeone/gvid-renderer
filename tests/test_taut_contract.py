@@ -471,12 +471,38 @@ class TautContractTest(unittest.TestCase):
             validate_export_lookup_query(invalid_query)
 
         denied = fixture("export_job_ack_scope_denied")
-        validate_export_submit_denial(denied)
+        validate_export_submit_denial(owner_a, denied)
         self.round_trip("ExportJobAck", denied)
+        stale = {**denied, "status": "stale_context"}
+        validate_export_submit_denial(owner_a, stale)
+        self.round_trip("ExportJobAck", stale)
         for change in ({"job_id": "job-a"}, {"diagnostic_id": "occupied"},
                        {"replayed": True}):
             with self.assertRaisesRegex(ValueError, "discloses job data"):
-                validate_export_submit_denial({**denied, **change})
+                validate_export_submit_denial(owner_a, {**denied, **change})
+        private_context = copy.deepcopy(owner_a["context"])
+        private_context["graph_id"] = "private-graph"
+        for change in ({"context": private_context}, {"context": owner_b["context"]},
+                       {"contract_version": 2}):
+            with self.assertRaisesRegex(ValueError, "echo request"):
+                validate_export_submit_denial(owner_a, {**denied, **change})
+
+        # These are shape comparisons, not a substitute for host occupancy tests.
+        same_request_denials = [copy.deepcopy(denied) for _ in range(3)]
+        for ack in same_request_denials:
+            validate_export_submit_denial(owner_a, ack)
+        encoded = [codec.encode(self.schema, "ExportJobAck", ack)
+                   for ack in same_request_denials]
+        self.assertEqual(encoded[0], encoded[1])
+        self.assertEqual(encoded[1], encoded[2])
+
+        another_id = copy.deepcopy(owner_a)
+        another_id["context"]["request_id"] = "unused-id"
+        another_denial = {**denied, "context": another_id["context"]}
+        validate_export_submit_denial(another_id, another_denial)
+        self.assertNotEqual(denied["context"], another_denial["context"])
+        self.assertEqual({k: v for k, v in denied.items() if k != "context"},
+                         {k: v for k, v in another_denial.items() if k != "context"})
 
     def test_export_negative_responses_carry_no_job_diagnostic(self) -> None:
         negative_cases = (
