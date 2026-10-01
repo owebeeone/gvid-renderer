@@ -183,6 +183,16 @@ class ExportLookupStatus(Enum):
     stale_context = 3
     retired_request = 4
 
+class ExportStatusResultStatus(Enum):
+    found = 1
+    unavailable = 2
+    stale_context = 3
+
+class ExportEventDeliveryStatus(Enum):
+    event = 1
+    unavailable = 2
+    stale_context = 3
+
 class ExportJobState(Enum):
     queued = 1
     preparing = 2
@@ -204,9 +214,8 @@ class ExportEventKind(Enum):
 class ExportCancelStatus(Enum):
     accepted = 1
     already_terminal = 2
-    unknown = 3
-    unauthorized = 4
     stale_context = 5
+    unavailable = 6
 
 @dataclass(slots=True)
 class Rational:
@@ -806,6 +815,24 @@ class ExportJobEvent:
     diagnostic_id: str | None
 
 @dataclass(slots=True)
+class ExportEventsQuery:
+    contract_version: int
+    project_id: str
+    job_id: str
+    after_event_sequence: int
+    caller_incarnation_id: str | None
+    local_import_id: str | None
+
+@dataclass(slots=True)
+class ExportEventDelivery:
+    contract_version: int
+    project_id: str
+    job_id: str
+    status: ExportEventDeliveryStatus
+    event: ExportJobEvent | None
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
 class ExportStatusQuery:
     contract_version: int
     project_id: str
@@ -821,6 +848,15 @@ class ExportStatusSnapshot:
     state: ExportJobState
     last_event_sequence: int
     result: ExportResult | None
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
+class ExportStatusResult:
+    contract_version: int
+    project_id: str
+    job_id: str
+    status: ExportStatusResultStatus
+    snapshot: ExportStatusSnapshot | None
     diagnostic_id: str | None
 
 @dataclass(slots=True)

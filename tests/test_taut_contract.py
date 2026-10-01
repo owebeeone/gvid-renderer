@@ -31,6 +31,14 @@ GOLDEN_SHA256 = {
     "export_job_ack_retired": ("ExportJobAck", "a4eb254d6062b85609025f03b592baca4ed9ef0986486dac90fb66ef5acb696b"),
     "export_lookup_query_standalone": ("ExportLookupQuery", "4bdfde9d79c7604be6048eeaefb880ab9195fcad71d3a583349eff014e3a855e"),
     "export_lookup_retired": ("ExportLookupResult", "d8f1192749613482cf88a1a68c3af833d83f0d31424e9cca039f44b5df95aca0"),
+    "export_events_query_governed": ("ExportEventsQuery", "d04f18a5e214b45882b834240c52c9458fad9ad0cdcb4cc9c80fd51320ef4e3b"),
+    "export_events_query_standalone": ("ExportEventsQuery", "0ed4a238080e0e58954f45b223fb6ebdff2b98c9331f29ae531c9b0b6fe13f14"),
+    "export_event_delivery_event": ("ExportEventDelivery", "aa337d33eb1d0a47d0ad65ff8cc6664b5150225a052050ae7af180bdf6a000a1"),
+    "export_event_delivery_unavailable": ("ExportEventDelivery", "6f782986058c7fc227d3e0946a53e684c2d5de06801a999b74de92a92703be00"),
+    "export_status_found": ("ExportStatusResult", "f1b7824fb28506510d721cba26b94373b732ffe3979ee58b8b4c6154983090e7"),
+    "export_status_unavailable": ("ExportStatusResult", "6f782986058c7fc227d3e0946a53e684c2d5de06801a999b74de92a92703be00"),
+    "export_status_stale": ("ExportStatusResult", "61b4a5801a5e0285d14118d6632083fe9417375d3872857d37b47eb85a8cd8c6"),
+    "export_cancel_unavailable": ("ExportCancelAck", "381a30d40eecc1729ef3b0c0f386cd864b428cce4405709453dc6a6b49b5aabf"),
 }
 
 
@@ -337,6 +345,18 @@ class TautContractTest(unittest.TestCase):
                 "state": state, "progress": progress, "result": event_result,
                 "diagnostic_id": None,
             })
+        for name in ("export_events_query_governed",
+                     "export_events_query_standalone"):
+            query = fixture(name)
+            self.assertEqual(query["caller_incarnation_id"] is None,
+                             query["local_import_id"] is not None)
+            self.round_trip("ExportEventsQuery", query)
+        for name in ("export_event_delivery_event",
+                     "export_event_delivery_unavailable"):
+            delivery = fixture(name)
+            self.assertEqual(delivery["event"] is not None,
+                             delivery["status"] == "event")
+            self.round_trip("ExportEventDelivery", delivery)
         self.round_trip("ExportStatusQuery", {
             "contract_version": 1, "project_id": "p1", "job_id": "job-a",
             "caller_incarnation_id": "open-2", "local_import_id": None,
@@ -348,6 +368,12 @@ class TautContractTest(unittest.TestCase):
             "diagnostic_id": None,
         }
         self.round_trip("ExportStatusSnapshot", status_snapshot)
+        for name in ("export_status_found", "export_status_unavailable",
+                     "export_status_stale"):
+            status_result = fixture(name)
+            self.assertEqual(status_result["snapshot"] is not None,
+                             status_result["status"] == "found")
+            self.round_trip("ExportStatusResult", status_result)
         self.round_trip("ExportLookupQuery", {
             "contract_version": 1, "project_id": "p1",
             "request_id": "export-a", "caller_incarnation_id": "open-2",
@@ -386,6 +412,10 @@ class TautContractTest(unittest.TestCase):
             "command_id": "cancel-b", "status": "accepted",
             "terminal_state": None,
         })
+        unavailable_cancel = fixture("export_cancel_unavailable")
+        self.assertEqual(unavailable_cancel["status"], "unavailable")
+        self.assertIsNone(unavailable_cancel["terminal_state"])
+        self.round_trip("ExportCancelAck", unavailable_cancel)
 
 
 if __name__ == "__main__":

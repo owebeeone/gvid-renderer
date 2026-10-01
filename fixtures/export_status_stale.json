@@ -1,0 +1,8 @@
+{
+  "contract_version": 1,
+  "project_id": "p1",
+  "job_id": "job-a",
+  "status": "stale_context",
+  "snapshot": null,
+  "diagnostic_id": null
+}

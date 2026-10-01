@@ -1,0 +1,47 @@
+{
+  "contract_version": 1,
+  "project_id": "p1",
+  "job_id": "job-a",
+  "status": "found",
+  "snapshot": {
+    "contract_version": 1,
+    "context": {
+      "request_id": "export-a",
+      "provenance": "governed_host",
+      "project_id": "p1",
+      "graph_id": "g1",
+      "sequence_id": "s1",
+      "authority_incarnation_id": "open-1",
+      "local_import_id": null,
+      "accepted_revision": 9,
+      "binding_set_id": "bind-2",
+      "binding_revision": 2,
+      "profile_id": "web-h264",
+      "profile_version": 3,
+      "profile_digest": "sha256:profile-v3"
+    },
+    "job_id": "job-a",
+    "state": "succeeded",
+    "last_event_sequence": 2,
+    "result": {
+      "export_record_id": "record-a",
+      "output_artifact_id": "artifact-a",
+      "probe_summary": {
+        "video_stream_count": 1,
+        "audio_stream_count": 1,
+        "duration": {
+          "numerator": 2,
+          "denominator": 1
+        },
+        "width": 1280,
+        "height": 720,
+        "audio_sample_rate": 48000,
+        "audio_channel_layout": "stereo"
+      },
+      "output_probe_digest": "sha256:probe-a",
+      "destination_generation_id": "generation-a"
+    },
+    "diagnostic_id": null
+  },
+  "diagnostic_id": null
+}

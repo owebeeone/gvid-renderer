@@ -1,0 +1,8 @@
+{
+  "contract_version": 1,
+  "project_id": "p1",
+  "job_id": "job-inaccessible",
+  "command_id": "cancel-1",
+  "status": "unavailable",
+  "terminal_state": null
+}

@@ -688,6 +688,46 @@ impl ExportLookupStatus {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum ExportStatusResultStatus {
+    #[default] Found,
+    Unavailable,
+    StaleContext,
+}
+impl ExportStatusResultStatus {
+    pub fn wire(self) -> i64 { match self {
+        Self::Found => 1,
+        Self::Unavailable => 2,
+        Self::StaleContext => 3,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Found,
+        2 => Self::Unavailable,
+        3 => Self::StaleContext,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "ExportStatusResultStatus", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum ExportEventDeliveryStatus {
+    #[default] Event,
+    Unavailable,
+    StaleContext,
+}
+impl ExportEventDeliveryStatus {
+    pub fn wire(self) -> i64 { match self {
+        Self::Event => 1,
+        Self::Unavailable => 2,
+        Self::StaleContext => 3,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Event,
+        2 => Self::Unavailable,
+        3 => Self::StaleContext,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "ExportEventDeliveryStatus", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub enum ExportJobState {
     #[default] Queued,
     Preparing,
@@ -755,24 +795,21 @@ impl ExportEventKind {
 pub enum ExportCancelStatus {
     #[default] Accepted,
     AlreadyTerminal,
-    Unknown,
-    Unauthorized,
     StaleContext,
+    Unavailable,
 }
 impl ExportCancelStatus {
     pub fn wire(self) -> i64 { match self {
         Self::Accepted => 1,
         Self::AlreadyTerminal => 2,
-        Self::Unknown => 3,
-        Self::Unauthorized => 4,
         Self::StaleContext => 5,
+        Self::Unavailable => 6,
     } }
     pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
         1 => Self::Accepted,
         2 => Self::AlreadyTerminal,
-        3 => Self::Unknown,
-        4 => Self::Unauthorized,
         5 => Self::StaleContext,
+        6 => Self::Unavailable,
         _ => return Err(DecodeError::UnknownEnum { enum_name: "ExportCancelStatus", value: v }),
     }) }
 }
@@ -3381,6 +3418,88 @@ impl ExportJobEvent {
 }
 
 #[derive(Clone, Debug, PartialEq, Default)]
+pub struct ExportEventsQuery {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub job_id: String,
+    pub after_event_sequence: i64,
+    pub caller_incarnation_id: Option<String>,
+    pub local_import_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl ExportEventsQuery {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.job_id.clone())),
+            (4, Cbor::Int(self.after_event_sequence)),
+            (5, match &self.caller_incarnation_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (6, match &self.local_import_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            job_id: c.try_get(3)?.try_text()?,
+            after_event_sequence: c.try_get(4)?.try_int()?,
+            caller_incarnation_id: { let v = c.try_get(5)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            local_import_id: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct ExportEventDelivery {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub job_id: String,
+    pub status: ExportEventDeliveryStatus,
+    pub event: Option<ExportJobEvent>,
+    pub diagnostic_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl ExportEventDelivery {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.job_id.clone())),
+            (4, Cbor::Int(self.status.wire())),
+            (5, match &self.event { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (6, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            job_id: c.try_get(3)?.try_text()?,
+            status: ExportEventDeliveryStatus::from_wire(c.try_get(4)?.try_int()?)?,
+            event: { let v = c.try_get(5)?; if v.is_null() { None } else { Some(ExportJobEvent::from_cbor(v)?) } },
+            diagnostic_id: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct ExportStatusQuery {
     pub contract_version: i64,
     pub project_id: String,
@@ -3455,6 +3574,47 @@ impl ExportStatusSnapshot {
             result: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(ExportResult::from_cbor(v)?) } },
             diagnostic_id: { let v = c.try_get(7)?; if v.is_null() { None } else { Some(v.try_text()?) } },
             wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct ExportStatusResult {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub job_id: String,
+    pub status: ExportStatusResultStatus,
+    pub snapshot: Option<ExportStatusSnapshot>,
+    pub diagnostic_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl ExportStatusResult {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.job_id.clone())),
+            (4, Cbor::Int(self.status.wire())),
+            (5, match &self.snapshot { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (6, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            job_id: c.try_get(3)?.try_text()?,
+            status: ExportStatusResultStatus::from_wire(c.try_get(4)?.try_int()?)?,
+            snapshot: { let v = c.try_get(5)?; if v.is_null() { None } else { Some(ExportStatusSnapshot::from_cbor(v)?) } },
+            diagnostic_id: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6)).map(|(t, v)| (*t, v.clone())).collect(),
         })
     }
     pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {

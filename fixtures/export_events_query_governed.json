@@ -1,0 +1,8 @@
+{
+  "contract_version": 1,
+  "project_id": "p1",
+  "job_id": "job-a",
+  "after_event_sequence": 0,
+  "caller_incarnation_id": "open-2",
+  "local_import_id": null
+}

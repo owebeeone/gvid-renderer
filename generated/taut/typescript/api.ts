@@ -28,9 +28,11 @@ export type ExportProvenance = "governed_host" | "standalone_import";
 export type ExportSubmitStatus = "accepted" | "stale_context" | "invalid" | "unauthorized" | "unsupported" | "capacity" | "recovery_required" | "destination_busy" | "idempotency_conflict" | "retired_request";
 export type ExportDestinationPolicy = "fail_if_exists" | "replace_existing";
 export type ExportLookupStatus = "found" | "unavailable" | "stale_context" | "retired_request";
+export type ExportStatusResultStatus = "found" | "unavailable" | "stale_context";
+export type ExportEventDeliveryStatus = "event" | "unavailable" | "stale_context";
 export type ExportJobState = "queued" | "preparing" | "running" | "verifying" | "succeeded" | "failed" | "cancelled" | "interrupted";
 export type ExportEventKind = "ready" | "state_change" | "progress" | "warning" | "heartbeat" | "recovery_required";
-export type ExportCancelStatus = "accepted" | "already_terminal" | "unknown" | "unauthorized" | "stale_context";
+export type ExportCancelStatus = "accepted" | "already_terminal" | "stale_context" | "unavailable";
 
 export interface Rational {
   numerator: bigint;
@@ -629,6 +631,24 @@ export interface ExportJobEvent {
   diagnostic_id: string | null;
 }
 
+export interface ExportEventsQuery {
+  contract_version: bigint;
+  project_id: string;
+  job_id: string;
+  after_event_sequence: bigint;
+  caller_incarnation_id: string | null;
+  local_import_id: string | null;
+}
+
+export interface ExportEventDelivery {
+  contract_version: bigint;
+  project_id: string;
+  job_id: string;
+  status: ExportEventDeliveryStatus;
+  event: ExportJobEvent | null;
+  diagnostic_id: string | null;
+}
+
 export interface ExportStatusQuery {
   contract_version: bigint;
   project_id: string;
@@ -644,6 +664,15 @@ export interface ExportStatusSnapshot {
   state: ExportJobState;
   last_event_sequence: bigint;
   result: ExportResult | null;
+  diagnostic_id: string | null;
+}
+
+export interface ExportStatusResult {
+  contract_version: bigint;
+  project_id: string;
+  job_id: string;
+  status: ExportStatusResultStatus;
+  snapshot: ExportStatusSnapshot | null;
   diagnostic_id: string | null;
 }
 

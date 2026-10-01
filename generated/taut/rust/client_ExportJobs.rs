@@ -12,8 +12,8 @@ impl<'a> ExportJobsClient<'a> {
     // export.lookup(request) -> ExportLookupResult
     // self.c.call("export.lookup", &[..encode args..]).await -> ExportLookupResult::from_cbor(..)
     // export.events: subscribe ("log") -> stream of ['append']
-    // export.status(request) -> ExportStatusSnapshot
-    // self.c.call("export.status", &[..encode args..]).await -> ExportStatusSnapshot::from_cbor(..)
+    // export.status(request) -> ExportStatusResult
+    // self.c.call("export.status", &[..encode args..]).await -> ExportStatusResult::from_cbor(..)
     // export.cancel(request) -> ExportCancelAck
     // self.c.call("export.cancel", &[..encode args..]).await -> ExportCancelAck::from_cbor(..)
 }
