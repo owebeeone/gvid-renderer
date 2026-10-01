@@ -1,0 +1,289 @@
+{
+  "command_id": "cmd-insert-1",
+  "expected_revision": 8,
+  "graph_id": "g1",
+  "operations": [
+    {
+      "edge": null,
+      "kind": "put_sequence",
+      "node": null,
+      "sequence": {
+        "audio_root": null,
+        "id": "s1",
+        "range": {
+          "end": {
+            "denominator": 1,
+            "numerator": 7
+          },
+          "start": {
+            "denominator": 1,
+            "numerator": 0
+          }
+        },
+        "video_root": "out-v"
+      },
+      "slot": null,
+      "target_id": "s1",
+      "track": null
+    },
+    {
+      "edge": null,
+      "kind": "put_node",
+      "node": {
+        "composite": null,
+        "effect": null,
+        "id": "clip-a",
+        "kind": "source",
+        "media": "video",
+        "output": null,
+        "sequence_id": "s1",
+        "source": {
+          "slot_id": "camera-a",
+          "source_range": {
+            "end": {
+              "denominator": 1,
+              "numerator": 1
+            },
+            "start": {
+              "denominator": 1,
+              "numerator": 0
+            }
+          },
+          "speed": {
+            "denominator": 1,
+            "numerator": 1
+          },
+          "stream_id": "video-0"
+        },
+        "timeline_range": {
+          "end": {
+            "denominator": 1,
+            "numerator": 1
+          },
+          "start": {
+            "denominator": 1,
+            "numerator": 0
+          }
+        },
+        "title": null,
+        "track_id": "v1",
+        "transition": null
+      },
+      "sequence": null,
+      "slot": null,
+      "target_id": "clip-a",
+      "track": null
+    },
+    {
+      "edge": null,
+      "kind": "put_node",
+      "node": {
+        "composite": null,
+        "effect": null,
+        "id": "clip-c",
+        "kind": "source",
+        "media": "video",
+        "output": null,
+        "sequence_id": "s1",
+        "source": {
+          "slot_id": "camera-c",
+          "source_range": {
+            "end": {
+              "denominator": 1,
+              "numerator": 1
+            },
+            "start": {
+              "denominator": 1,
+              "numerator": 0
+            }
+          },
+          "speed": {
+            "denominator": 1,
+            "numerator": 1
+          },
+          "stream_id": "video-0"
+        },
+        "timeline_range": {
+          "end": {
+            "denominator": 1,
+            "numerator": 2
+          },
+          "start": {
+            "denominator": 1,
+            "numerator": 1
+          }
+        },
+        "title": null,
+        "track_id": "v1",
+        "transition": null
+      },
+      "sequence": null,
+      "slot": null,
+      "target_id": "clip-c",
+      "track": null
+    },
+    {
+      "edge": null,
+      "kind": "put_node",
+      "node": {
+        "composite": null,
+        "effect": null,
+        "id": "clip-a-right",
+        "kind": "source",
+        "media": "video",
+        "output": null,
+        "sequence_id": "s1",
+        "source": {
+          "slot_id": "camera-a",
+          "source_range": {
+            "end": {
+              "denominator": 1,
+              "numerator": 2
+            },
+            "start": {
+              "denominator": 1,
+              "numerator": 1
+            }
+          },
+          "speed": {
+            "denominator": 1,
+            "numerator": 1
+          },
+          "stream_id": "video-0"
+        },
+        "timeline_range": {
+          "end": {
+            "denominator": 1,
+            "numerator": 3
+          },
+          "start": {
+            "denominator": 1,
+            "numerator": 2
+          }
+        },
+        "title": null,
+        "track_id": "v1",
+        "transition": null
+      },
+      "sequence": null,
+      "slot": null,
+      "target_id": "clip-a-right",
+      "track": null
+    },
+    {
+      "edge": null,
+      "kind": "put_node",
+      "node": {
+        "composite": null,
+        "effect": null,
+        "id": "clip-b",
+        "kind": "source",
+        "media": "video",
+        "output": null,
+        "sequence_id": "s1",
+        "source": {
+          "slot_id": "camera-b",
+          "source_range": {
+            "end": {
+              "denominator": 1,
+              "numerator": 2
+            },
+            "start": {
+              "denominator": 1,
+              "numerator": 0
+            }
+          },
+          "speed": {
+            "denominator": 1,
+            "numerator": 1
+          },
+          "stream_id": "video-0"
+        },
+        "timeline_range": {
+          "end": {
+            "denominator": 1,
+            "numerator": 7
+          },
+          "start": {
+            "denominator": 1,
+            "numerator": 5
+          }
+        },
+        "title": null,
+        "track_id": "v1",
+        "transition": null
+      },
+      "sequence": null,
+      "slot": null,
+      "target_id": "clip-b",
+      "track": null
+    },
+    {
+      "edge": null,
+      "kind": "put_node",
+      "node": {
+        "composite": {
+          "blend_id": "timeline.select.v1"
+        },
+        "effect": null,
+        "id": "track-v1",
+        "kind": "composite",
+        "media": "video",
+        "output": null,
+        "sequence_id": "s1",
+        "source": null,
+        "timeline_range": {
+          "end": {
+            "denominator": 1,
+            "numerator": 7
+          },
+          "start": {
+            "denominator": 1,
+            "numerator": 0
+          }
+        },
+        "title": null,
+        "track_id": "v1",
+        "transition": null
+      },
+      "sequence": null,
+      "slot": null,
+      "target_id": "track-v1",
+      "track": null
+    },
+    {
+      "edge": {
+        "from_node": "clip-c",
+        "from_port": "video",
+        "id": "edge-c",
+        "order_key": null,
+        "to_node": "track-v1",
+        "to_port": "item"
+      },
+      "kind": "put_edge",
+      "node": null,
+      "sequence": null,
+      "slot": null,
+      "target_id": "edge-c",
+      "track": null
+    },
+    {
+      "edge": {
+        "from_node": "clip-a-right",
+        "from_port": "video",
+        "id": "edge-a-right",
+        "order_key": null,
+        "to_node": "track-v1",
+        "to_port": "item"
+      },
+      "kind": "put_edge",
+      "node": null,
+      "sequence": null,
+      "slot": null,
+      "target_id": "edge-a-right",
+      "track": null
+    }
+  ],
+  "project_id": "p1",
+  "undo_group_id": "gesture-1"
+}

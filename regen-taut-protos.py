@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
-"""Regenerate GVid render-graph Taut bindings for Python, Rust, and TypeScript."""
+"""Regenerate GVid Taut bindings for Python, Rust, and TypeScript."""
 
 from __future__ import annotations
 
 import importlib.metadata
 import os
+import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 SCHEMA = ROOT / "ir" / "gvid_render_graph.taut.py"
 OUTPUT = ROOT / "generated" / "taut"
+MARKER = ".generated-by-regen-taut-protos"
 TAUT_PROTO_VERSION = "0.10.0"
 
 
@@ -22,57 +26,84 @@ def ensure_taut_proto() -> None:
     except importlib.metadata.PackageNotFoundError:
         package = f"taut-proto=={TAUT_PROTO_VERSION}"
         print(f"Installing {package} with {sys.executable}", flush=True)
-        subprocess.run(
-            [sys.executable, "-m", "pip", "install", package],
-            check=True,
-        )
+        subprocess.run([sys.executable, "-m", "pip", "install", package], check=True)
     else:
         if installed != TAUT_PROTO_VERSION:
-            print(
-                f"Warning: taut-proto {installed} is installed; this script "
-                f"was checked with {TAUT_PROTO_VERSION}.",
-                file=sys.stderr,
+            raise SystemExit(
+                f"taut-proto {installed} is installed; expected {TAUT_PROTO_VERSION}. "
+                "Use the pinned version before regenerating bindings."
             )
+
+
+def replace_generated_directory(source: Path) -> None:
+    """Replace only this script's marked output, after a successful generation."""
+    expected = ROOT.resolve() / "generated" / "taut"
+    if OUTPUT.resolve() != expected or OUTPUT.is_symlink():
+        raise RuntimeError(f"Refusing to replace output outside renderer repo: {OUTPUT}")
+    if OUTPUT.exists():
+        if not OUTPUT.is_dir() or not (OUTPUT / MARKER).is_file():
+            raise RuntimeError(f"Refusing to replace unmarked output: {OUTPUT}")
+        shutil.rmtree(OUTPUT)
+    shutil.copytree(source, OUTPUT)
 
 
 def main() -> int:
     if not SCHEMA.is_file():
         print(f"Taut schema not found: {SCHEMA}", file=sys.stderr)
         return 2
-
     ensure_taut_proto()
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
-    # This runs the same entry point as tautc, without relying on PATH.
-    command = [
-        sys.executable,
-        "-m",
-        "taut.cli",
-        "gen",
-        str(SCHEMA),
-        "--out",
-        str(OUTPUT),
-        "--lang",
-        "python,rust,typescript",
-        "--with-runtime",
-        "--forward-compat",
-    ]
-    # Taut's generated runtime includes Unicode and needs UTF-8 on Windows.
-    environment = os.environ.copy()
-    environment["PYTHONUTF8"] = "1"
-    print(f"Generating Taut bindings from {SCHEMA} into {OUTPUT}", flush=True)
-    result = subprocess.run(
-        command, cwd=ROOT, env=environment, check=False
-    ).returncode
-    if result:
-        return result
+    with tempfile.TemporaryDirectory(prefix=".taut-", dir=OUTPUT.parent) as work:
+        staging = Path(work)
+        # This is tautc's entry point without relying on the user Scripts PATH.
+        command = [
+            sys.executable, "-m", "taut.cli", "gen", str(SCHEMA),
+            "--out", str(staging), "--lang", "python,rust,typescript",
+            "--with-runtime", "--forward-compat",
+        ]
+        environment = os.environ.copy()
+        environment["PYTHONUTF8"] = "1"
+        print(f"Generating Taut bindings from {SCHEMA}", flush=True)
+        result = subprocess.run(command, cwd=ROOT, env=environment, check=False)
+        if result.returncode:
+            return result.returncode
 
-    # tautc writes CRLF on Windows; keep checked-in bindings platform neutral.
-    for path in OUTPUT.rglob("*"):
-        if path.suffix in {".py", ".rs", ".ts"}:
-            data = path.read_bytes()
-            normalized = data.replace(b"\r\n", b"\n").rstrip(b"\n") + b"\n"
-            if normalized != data:
-                path.write_bytes(normalized)
+        # taut-proto 0.10.0 omits imports for bare service parameter types.
+        ts_dir = staging / "typescript"
+        api_text = (ts_dir / "api.ts").read_text(encoding="utf-8")
+        exported = set(re.findall(
+            r"^export (?:type|interface|enum) ([A-Za-z_][A-Za-z0-9_]*)",
+            api_text, re.MULTILINE,
+        ))
+        for path in (*ts_dir.glob("client_*.ts"), *ts_dir.glob("server_*.ts")):
+            generated = path.read_text(encoding="utf-8")
+            names = sorted(set(re.findall(
+                r":\s*([A-Za-z_][A-Za-z0-9_]*)", generated,
+            )) & exported)
+            if names:
+                anchor = 'import type * as api from "./api.ts";'
+                if generated.count(anchor) != 1:
+                    raise RuntimeError(f"Unexpected Taut TypeScript imports: {path}")
+                generated = generated.replace(
+                    anchor, anchor + "\nimport type { " + ", ".join(names)
+                    + ' } from "./api.ts";',
+                )
+                path.write_text(generated, encoding="utf-8", newline="\n")
+
+        # tautc writes CRLF on Windows; checked-in bindings use portable LF.
+        for path in staging.rglob("*"):
+            if path.suffix in {".py", ".rs", ".ts"}:
+                data = path.read_bytes()
+                normalized = data.replace(b"\r\n", b"\n").rstrip(b"\n") + b"\n"
+                if normalized != data:
+                    path.write_bytes(normalized)
+        (staging / MARKER).write_text(
+            f"Generated by regen-taut-protos.py with taut-proto=={TAUT_PROTO_VERSION}.\n",
+            encoding="utf-8", newline="\n",
+        )
+        replace_generated_directory(staging)
+    print(f"Bindings ready in {OUTPUT}", flush=True)
     return 0
 
 

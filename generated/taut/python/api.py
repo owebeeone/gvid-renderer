@@ -37,9 +37,125 @@ class EditKind(Enum):
 
 class AckStatus(Enum):
     accepted = 1
-    duplicate = 2
-    stale = 3
-    invalid = 4
+    stale = 2
+    invalid = 3
+    unauthorized = 4
+
+class GraphEventKind(Enum):
+    ready = 1
+    change = 2
+    heartbeat = 3
+    recovery_required = 4
+
+class PlacementMode(Enum):
+    ripple_track = 1
+    overwrite_track = 2
+
+class EditorStatus(Enum):
+    accepted = 1
+    stale_graph = 2
+    stale_binding = 3
+    invalid_range = 4
+    locked_track = 5
+    unsupported_ripple_scope = 6
+    unauthorized = 7
+    invalid_command = 8
+    unsupported_schema = 9
+    recovery_required = 10
+
+class BindingStatus(Enum):
+    accepted = 1
+    stale_graph = 2
+    stale_binding = 3
+    incompatible_media = 4
+    invalid_policy = 5
+    unauthorized = 6
+    invalid_command = 7
+
+class BindingEventKind(Enum):
+    ready = 1
+    change = 2
+    heartbeat = 3
+    recovery_required = 4
+
+class CatalogEventKind(Enum):
+    ready = 1
+    change = 2
+    heartbeat = 3
+    recovery_required = 4
+
+class AssetAvailability(Enum):
+    online = 1
+    missing = 2
+    changed = 3
+    offline = 4
+
+class IndexStatus(Enum):
+    pending = 1
+    ready = 2
+    failed = 3
+
+class FrameLookupStatus(Enum):
+    ready = 1
+    pending = 2
+    out_of_range = 3
+    unavailable = 4
+    stale_version = 5
+    failed = 6
+
+class DurationPolicy(Enum):
+    exact = 1
+    trim = 2
+    pad = 3
+
+class FrameRatePolicy(Enum):
+    source_pts = 1
+    conform = 2
+
+class AspectPolicy(Enum):
+    reject = 1
+    fit = 2
+    crop = 3
+
+class ChannelPolicy(Enum):
+    reject = 1
+    map = 2
+
+class MissingRangePolicy(Enum):
+    reject = 1
+    gap = 2
+
+class PreviewFidelity(Enum):
+    exact = 1
+    proxy = 2
+
+class PreviewStatus(Enum):
+    ready = 1
+    cancelled = 2
+    stale_graph = 3
+    stale_binding = 4
+    unsupported = 5
+    failed = 6
+    stale_asset = 7
+
+class AuthorityState(Enum):
+    ready = 1
+    read_only_future_version = 2
+    recovery_required = 3
+    closed = 4
+
+class LeaseStatus(Enum):
+    granted = 1
+    held_by_other = 2
+    stale_incarnation = 3
+    read_only = 4
+    recovery_required = 5
+
+class ResourceActionStatus(Enum):
+    accepted = 1
+    unknown = 2
+    expired = 3
+    unauthorized = 4
 
 @dataclass(slots=True)
 class Rational:
@@ -163,6 +279,11 @@ class GraphSemantics:
     slots: dict[str, AssetSlot]
 
 @dataclass(slots=True)
+class GraphSnapshotDelivery:
+    snapshot: GraphSnapshot
+    authority_incarnation_id: str
+
+@dataclass(slots=True)
 class EditOperation:
     kind: EditKind
     target_id: str
@@ -180,6 +301,12 @@ class EditBatch:
     expected_revision: int
     undo_group_id: str
     operations: list[EditOperation]
+
+@dataclass(slots=True)
+class ApplyGraphBatch:
+    batch: EditBatch
+    authority_incarnation_id: str
+    writer_capability: str
 
 @dataclass(slots=True)
 class AffectedInterval:
@@ -201,6 +328,10 @@ class EditAck:
     semantic_digest: str | None
     reason: str | None
     footprint: ChangeFootprint | None
+    project_id: str
+    graph_id: str
+    authority_incarnation_id: str
+    replayed: bool
 
 @dataclass(slots=True)
 class AcceptedChange:
@@ -210,3 +341,381 @@ class AcceptedChange:
     to_revision: int
     operations: list[EditOperation]
     footprint: ChangeFootprint
+    project_id: str
+
+@dataclass(slots=True)
+class GraphChangeEvent:
+    kind: GraphEventKind
+    project_id: str
+    graph_id: str
+    authority_incarnation_id: str
+    revision: int
+    first_available_revision: int
+    change: AcceptedChange | None
+    reason: str | None
+
+@dataclass(slots=True)
+class InsertSourceSpan:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    sequence_id: str
+    authority_incarnation_id: str
+    command_id: str
+    expected_revision: int
+    target_track_id: str
+    timeline_at: Rational
+    placement: PlacementMode
+    slot_id: str | None
+    stream_id: str
+    source_range: TimeRange
+    speed: Rational
+    expected_binding_set_id: str
+    undo_group_id: str
+    writer_capability: str
+    registered_asset_id: str | None
+    asset_version_id: str | None
+
+@dataclass(slots=True)
+class HistoryIntent:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    sequence_id: str
+    authority_incarnation_id: str
+    command_id: str
+    expected_revision: int
+    target_undo_group_id: str
+    expected_binding_set_id: str
+    writer_capability: str
+
+@dataclass(slots=True)
+class UndoGroupSummary:
+    group_id: str
+    sequence_id: str
+    label: str
+    command_id: str
+
+@dataclass(slots=True)
+class HistoryState:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    sequence_id: str
+    authority_incarnation_id: str
+    revision: int
+    undo_groups: list[UndoGroupSummary]
+    redo_groups: list[UndoGroupSummary]
+    can_undo: bool
+    can_redo: bool
+
+@dataclass(slots=True)
+class EditorAck:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    sequence_id: str
+    authority_incarnation_id: str
+    command_id: str
+    status: EditorStatus
+    replayed: bool
+    revision: int
+    binding_set_id: str
+    footprint: ChangeFootprint | None
+    diagnostic_id: str | None
+    binding_revision: int
+    created_slot_id: str | None
+
+@dataclass(slots=True)
+class CatalogStream:
+    id: str
+    media: MediaKind
+    duration: Rational
+    pts_origin: Rational
+    frame_count: int | None
+    frame_index_id: str | None
+    index_status: IndexStatus
+
+@dataclass(slots=True)
+class RegisteredAsset:
+    id: str
+    version_id: str
+    content_fingerprint: str
+    display_name: str
+    streams: dict[str, CatalogStream]
+    availability: AssetAvailability
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
+class CatalogSnapshot:
+    contract_version: int
+    project_id: str
+    authority_incarnation_id: str
+    catalog_revision: int
+    assets: dict[str, RegisteredAsset]
+
+@dataclass(slots=True)
+class CatalogChange:
+    project_id: str
+    from_catalog_revision: int
+    to_catalog_revision: int
+    upserts: dict[str, RegisteredAsset]
+    removed_asset_ids: list[str]
+
+@dataclass(slots=True)
+class CatalogChangeEvent:
+    kind: CatalogEventKind
+    project_id: str
+    authority_incarnation_id: str
+    catalog_revision: int
+    first_available_revision: int
+    change: CatalogChange | None
+    reason: str | None
+
+@dataclass(slots=True)
+class FrameIndexQuery:
+    contract_version: int
+    project_id: str
+    authority_incarnation_id: str
+    registered_asset_id: str
+    asset_version_id: str
+    stream_id: str
+    frame_index: int
+
+@dataclass(slots=True)
+class FrameIndexResult:
+    contract_version: int
+    project_id: str
+    authority_incarnation_id: str
+    registered_asset_id: str
+    asset_version_id: str
+    stream_id: str
+    frame_index: int
+    status: FrameLookupStatus
+    pts: Rational | None
+    frame_count: int | None
+    content_fingerprint: str | None
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
+class AssetBinding:
+    slot_id: str
+    registered_asset_id: str
+    asset_version_id: str
+    stream_id: str
+    content_fingerprint: str
+    media: MediaKind
+    duration: Rational
+
+@dataclass(slots=True)
+class BindingSnapshot:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    authority_incarnation_id: str
+    binding_set_id: str
+    binding_revision: int
+    bindings: dict[str, AssetBinding]
+
+@dataclass(slots=True)
+class BindingPolicy:
+    duration: DurationPolicy
+    frame_rate: FrameRatePolicy
+    aspect: AspectPolicy
+    channels: ChannelPolicy
+    missing_range: MissingRangePolicy
+
+@dataclass(slots=True)
+class RebindSlot:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    authority_incarnation_id: str
+    command_id: str
+    expected_graph_revision: int
+    expected_binding_set_id: str
+    slot_id: str
+    registered_asset_id: str
+    asset_version_id: str
+    stream_id: str
+    policy: BindingPolicy
+    writer_capability: str
+
+@dataclass(slots=True)
+class BindingAck:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    authority_incarnation_id: str
+    command_id: str
+    status: BindingStatus
+    replayed: bool
+    graph_revision: int
+    binding_set_id: str
+    binding_revision: int
+    footprint: ChangeFootprint | None
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
+class BindingChange:
+    project_id: str
+    graph_id: str
+    from_binding_revision: int
+    to_binding_revision: int
+    from_binding_set_id: str
+    to_binding_set_id: str
+    changed_slot_ids: list[str]
+    footprint: ChangeFootprint
+
+@dataclass(slots=True)
+class BindingChangeEvent:
+    kind: BindingEventKind
+    project_id: str
+    graph_id: str
+    authority_incarnation_id: str
+    binding_revision: int
+    first_available_revision: int
+    change: BindingChange | None
+    reason: str | None
+
+@dataclass(slots=True)
+class SourcePreviewRequest:
+    contract_version: int
+    project_id: str
+    authority_incarnation_id: str
+    registered_asset_id: str
+    asset_version_id: str
+    stream_id: str
+    request_id: str
+    viewer_id: str
+    cancel_group_id: str
+    at: Rational
+    fidelity: PreviewFidelity
+    max_edge_px: int
+    expected_content_fingerprint: str
+
+@dataclass(slots=True)
+class SequencePreviewRequest:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    sequence_id: str
+    authority_incarnation_id: str
+    accepted_revision: int
+    binding_set_id: str
+    binding_revision: int
+    request_id: str
+    viewer_id: str
+    cancel_group_id: str
+    at: Rational
+    fidelity: PreviewFidelity
+    max_edge_px: int
+
+@dataclass(slots=True)
+class ResourceDescriptor:
+    resource_id: str
+    lease_id: str
+    mime_type: str
+    width: int
+    height: int
+    byte_length: int
+    expires_at_unix_ms: int
+
+@dataclass(slots=True)
+class SourcePreviewResult:
+    contract_version: int
+    project_id: str
+    authority_incarnation_id: str
+    registered_asset_id: str
+    asset_version_id: str
+    stream_id: str
+    request_id: str
+    viewer_id: str
+    cancel_group_id: str
+    status: PreviewStatus
+    fidelity: PreviewFidelity
+    actual_time: Rational | None
+    resource: ResourceDescriptor | None
+    error_code: str | None
+    diagnostic_id: str | None
+    content_fingerprint: str
+
+@dataclass(slots=True)
+class SequencePreviewResult:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    sequence_id: str
+    authority_incarnation_id: str
+    accepted_revision: int
+    binding_set_id: str
+    binding_revision: int
+    request_id: str
+    viewer_id: str
+    cancel_group_id: str
+    status: PreviewStatus
+    fidelity: PreviewFidelity
+    actual_time: Rational | None
+    plan_id: str | None
+    resource: ResourceDescriptor | None
+    error_code: str | None
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
+class CancelPreview:
+    contract_version: int
+    project_id: str
+    graph_id: str | None
+    authority_incarnation_id: str
+    request_id: str
+    viewer_id: str
+    cancel_group_id: str
+
+@dataclass(slots=True)
+class ReleaseResource:
+    contract_version: int
+    project_id: str
+    graph_id: str | None
+    authority_incarnation_id: str
+    lease_id: str
+    viewer_id: str
+
+@dataclass(slots=True)
+class ResourceActionAck:
+    contract_version: int
+    project_id: str
+    graph_id: str | None
+    authority_incarnation_id: str
+    action_id: str
+    status: ResourceActionStatus
+
+@dataclass(slots=True)
+class ProjectOpen:
+    contract_version: int
+    project_id: str
+    graph_id: str | None
+    authority_incarnation_id: str
+    state: AuthorityState
+    graph_revision: int
+    binding_set_id: str | None
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
+class AcquireWriter:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    authority_incarnation_id: str
+    request_id: str
+
+@dataclass(slots=True)
+class WriterLease:
+    contract_version: int
+    project_id: str
+    graph_id: str
+    authority_incarnation_id: str
+    request_id: str
+    status: LeaseStatus
+    lease_id: str | None
+    writer_capability: str | None
+    expires_at_unix_ms: int | None

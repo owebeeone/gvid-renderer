@@ -126,23 +126,466 @@ impl EditKind {
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub enum AckStatus {
     #[default] Accepted,
-    Duplicate,
     Stale,
     Invalid,
+    Unauthorized,
 }
 impl AckStatus {
     pub fn wire(self) -> i64 { match self {
         Self::Accepted => 1,
-        Self::Duplicate => 2,
-        Self::Stale => 3,
-        Self::Invalid => 4,
+        Self::Stale => 2,
+        Self::Invalid => 3,
+        Self::Unauthorized => 4,
     } }
     pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
         1 => Self::Accepted,
-        2 => Self::Duplicate,
-        3 => Self::Stale,
-        4 => Self::Invalid,
+        2 => Self::Stale,
+        3 => Self::Invalid,
+        4 => Self::Unauthorized,
         _ => return Err(DecodeError::UnknownEnum { enum_name: "AckStatus", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum GraphEventKind {
+    #[default] Ready,
+    Change,
+    Heartbeat,
+    RecoveryRequired,
+}
+impl GraphEventKind {
+    pub fn wire(self) -> i64 { match self {
+        Self::Ready => 1,
+        Self::Change => 2,
+        Self::Heartbeat => 3,
+        Self::RecoveryRequired => 4,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Ready,
+        2 => Self::Change,
+        3 => Self::Heartbeat,
+        4 => Self::RecoveryRequired,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "GraphEventKind", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum PlacementMode {
+    #[default] RippleTrack,
+    OverwriteTrack,
+}
+impl PlacementMode {
+    pub fn wire(self) -> i64 { match self {
+        Self::RippleTrack => 1,
+        Self::OverwriteTrack => 2,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::RippleTrack,
+        2 => Self::OverwriteTrack,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "PlacementMode", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum EditorStatus {
+    #[default] Accepted,
+    StaleGraph,
+    StaleBinding,
+    InvalidRange,
+    LockedTrack,
+    UnsupportedRippleScope,
+    Unauthorized,
+    InvalidCommand,
+    UnsupportedSchema,
+    RecoveryRequired,
+}
+impl EditorStatus {
+    pub fn wire(self) -> i64 { match self {
+        Self::Accepted => 1,
+        Self::StaleGraph => 2,
+        Self::StaleBinding => 3,
+        Self::InvalidRange => 4,
+        Self::LockedTrack => 5,
+        Self::UnsupportedRippleScope => 6,
+        Self::Unauthorized => 7,
+        Self::InvalidCommand => 8,
+        Self::UnsupportedSchema => 9,
+        Self::RecoveryRequired => 10,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Accepted,
+        2 => Self::StaleGraph,
+        3 => Self::StaleBinding,
+        4 => Self::InvalidRange,
+        5 => Self::LockedTrack,
+        6 => Self::UnsupportedRippleScope,
+        7 => Self::Unauthorized,
+        8 => Self::InvalidCommand,
+        9 => Self::UnsupportedSchema,
+        10 => Self::RecoveryRequired,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "EditorStatus", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum BindingStatus {
+    #[default] Accepted,
+    StaleGraph,
+    StaleBinding,
+    IncompatibleMedia,
+    InvalidPolicy,
+    Unauthorized,
+    InvalidCommand,
+}
+impl BindingStatus {
+    pub fn wire(self) -> i64 { match self {
+        Self::Accepted => 1,
+        Self::StaleGraph => 2,
+        Self::StaleBinding => 3,
+        Self::IncompatibleMedia => 4,
+        Self::InvalidPolicy => 5,
+        Self::Unauthorized => 6,
+        Self::InvalidCommand => 7,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Accepted,
+        2 => Self::StaleGraph,
+        3 => Self::StaleBinding,
+        4 => Self::IncompatibleMedia,
+        5 => Self::InvalidPolicy,
+        6 => Self::Unauthorized,
+        7 => Self::InvalidCommand,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "BindingStatus", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum BindingEventKind {
+    #[default] Ready,
+    Change,
+    Heartbeat,
+    RecoveryRequired,
+}
+impl BindingEventKind {
+    pub fn wire(self) -> i64 { match self {
+        Self::Ready => 1,
+        Self::Change => 2,
+        Self::Heartbeat => 3,
+        Self::RecoveryRequired => 4,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Ready,
+        2 => Self::Change,
+        3 => Self::Heartbeat,
+        4 => Self::RecoveryRequired,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "BindingEventKind", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum CatalogEventKind {
+    #[default] Ready,
+    Change,
+    Heartbeat,
+    RecoveryRequired,
+}
+impl CatalogEventKind {
+    pub fn wire(self) -> i64 { match self {
+        Self::Ready => 1,
+        Self::Change => 2,
+        Self::Heartbeat => 3,
+        Self::RecoveryRequired => 4,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Ready,
+        2 => Self::Change,
+        3 => Self::Heartbeat,
+        4 => Self::RecoveryRequired,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "CatalogEventKind", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum AssetAvailability {
+    #[default] Online,
+    Missing,
+    Changed,
+    Offline,
+}
+impl AssetAvailability {
+    pub fn wire(self) -> i64 { match self {
+        Self::Online => 1,
+        Self::Missing => 2,
+        Self::Changed => 3,
+        Self::Offline => 4,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Online,
+        2 => Self::Missing,
+        3 => Self::Changed,
+        4 => Self::Offline,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "AssetAvailability", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum IndexStatus {
+    #[default] Pending,
+    Ready,
+    Failed,
+}
+impl IndexStatus {
+    pub fn wire(self) -> i64 { match self {
+        Self::Pending => 1,
+        Self::Ready => 2,
+        Self::Failed => 3,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Pending,
+        2 => Self::Ready,
+        3 => Self::Failed,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "IndexStatus", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum FrameLookupStatus {
+    #[default] Ready,
+    Pending,
+    OutOfRange,
+    Unavailable,
+    StaleVersion,
+    Failed,
+}
+impl FrameLookupStatus {
+    pub fn wire(self) -> i64 { match self {
+        Self::Ready => 1,
+        Self::Pending => 2,
+        Self::OutOfRange => 3,
+        Self::Unavailable => 4,
+        Self::StaleVersion => 5,
+        Self::Failed => 6,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Ready,
+        2 => Self::Pending,
+        3 => Self::OutOfRange,
+        4 => Self::Unavailable,
+        5 => Self::StaleVersion,
+        6 => Self::Failed,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "FrameLookupStatus", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum DurationPolicy {
+    #[default] Exact,
+    Trim,
+    Pad,
+}
+impl DurationPolicy {
+    pub fn wire(self) -> i64 { match self {
+        Self::Exact => 1,
+        Self::Trim => 2,
+        Self::Pad => 3,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Exact,
+        2 => Self::Trim,
+        3 => Self::Pad,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "DurationPolicy", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum FrameRatePolicy {
+    #[default] SourcePts,
+    Conform,
+}
+impl FrameRatePolicy {
+    pub fn wire(self) -> i64 { match self {
+        Self::SourcePts => 1,
+        Self::Conform => 2,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::SourcePts,
+        2 => Self::Conform,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "FrameRatePolicy", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum AspectPolicy {
+    #[default] Reject,
+    Fit,
+    Crop,
+}
+impl AspectPolicy {
+    pub fn wire(self) -> i64 { match self {
+        Self::Reject => 1,
+        Self::Fit => 2,
+        Self::Crop => 3,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Reject,
+        2 => Self::Fit,
+        3 => Self::Crop,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "AspectPolicy", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum ChannelPolicy {
+    #[default] Reject,
+    Map,
+}
+impl ChannelPolicy {
+    pub fn wire(self) -> i64 { match self {
+        Self::Reject => 1,
+        Self::Map => 2,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Reject,
+        2 => Self::Map,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "ChannelPolicy", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum MissingRangePolicy {
+    #[default] Reject,
+    Gap,
+}
+impl MissingRangePolicy {
+    pub fn wire(self) -> i64 { match self {
+        Self::Reject => 1,
+        Self::Gap => 2,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Reject,
+        2 => Self::Gap,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "MissingRangePolicy", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum PreviewFidelity {
+    #[default] Exact,
+    Proxy,
+}
+impl PreviewFidelity {
+    pub fn wire(self) -> i64 { match self {
+        Self::Exact => 1,
+        Self::Proxy => 2,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Exact,
+        2 => Self::Proxy,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "PreviewFidelity", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum PreviewStatus {
+    #[default] Ready,
+    Cancelled,
+    StaleGraph,
+    StaleBinding,
+    Unsupported,
+    Failed,
+    StaleAsset,
+}
+impl PreviewStatus {
+    pub fn wire(self) -> i64 { match self {
+        Self::Ready => 1,
+        Self::Cancelled => 2,
+        Self::StaleGraph => 3,
+        Self::StaleBinding => 4,
+        Self::Unsupported => 5,
+        Self::Failed => 6,
+        Self::StaleAsset => 7,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Ready,
+        2 => Self::Cancelled,
+        3 => Self::StaleGraph,
+        4 => Self::StaleBinding,
+        5 => Self::Unsupported,
+        6 => Self::Failed,
+        7 => Self::StaleAsset,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "PreviewStatus", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum AuthorityState {
+    #[default] Ready,
+    ReadOnlyFutureVersion,
+    RecoveryRequired,
+    Closed,
+}
+impl AuthorityState {
+    pub fn wire(self) -> i64 { match self {
+        Self::Ready => 1,
+        Self::ReadOnlyFutureVersion => 2,
+        Self::RecoveryRequired => 3,
+        Self::Closed => 4,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Ready,
+        2 => Self::ReadOnlyFutureVersion,
+        3 => Self::RecoveryRequired,
+        4 => Self::Closed,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "AuthorityState", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum LeaseStatus {
+    #[default] Granted,
+    HeldByOther,
+    StaleIncarnation,
+    ReadOnly,
+    RecoveryRequired,
+}
+impl LeaseStatus {
+    pub fn wire(self) -> i64 { match self {
+        Self::Granted => 1,
+        Self::HeldByOther => 2,
+        Self::StaleIncarnation => 3,
+        Self::ReadOnly => 4,
+        Self::RecoveryRequired => 5,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Granted,
+        2 => Self::HeldByOther,
+        3 => Self::StaleIncarnation,
+        4 => Self::ReadOnly,
+        5 => Self::RecoveryRequired,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "LeaseStatus", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum ResourceActionStatus {
+    #[default] Accepted,
+    Unknown,
+    Expired,
+    Unauthorized,
+}
+impl ResourceActionStatus {
+    pub fn wire(self) -> i64 { match self {
+        Self::Accepted => 1,
+        Self::Unknown => 2,
+        Self::Expired => 3,
+        Self::Unauthorized => 4,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Accepted,
+        2 => Self::Unknown,
+        3 => Self::Expired,
+        4 => Self::Unauthorized,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "ResourceActionStatus", value: v }),
     }) }
 }
 
@@ -734,6 +1177,35 @@ impl GraphSemantics {
 }
 
 #[derive(Clone, Debug, PartialEq, Default)]
+pub struct GraphSnapshotDelivery {
+    pub snapshot: GraphSnapshot,
+    pub authority_incarnation_id: String,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl GraphSnapshotDelivery {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, self.snapshot.to_cbor()),
+            (2, Cbor::Text(self.authority_incarnation_id.clone())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            snapshot: GraphSnapshot::from_cbor(c.try_get(1)?)?,
+            authority_incarnation_id: c.try_get(2)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct EditOperation {
     pub kind: EditKind,
     pub target_id: String,
@@ -819,6 +1291,38 @@ impl EditBatch {
 }
 
 #[derive(Clone, Debug, PartialEq, Default)]
+pub struct ApplyGraphBatch {
+    pub batch: EditBatch,
+    pub authority_incarnation_id: String,
+    pub writer_capability: String,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl ApplyGraphBatch {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, self.batch.to_cbor()),
+            (2, Cbor::Text(self.authority_incarnation_id.clone())),
+            (3, Cbor::Text(self.writer_capability.clone())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            batch: EditBatch::from_cbor(c.try_get(1)?)?,
+            authority_incarnation_id: c.try_get(2)?.try_text()?,
+            writer_capability: c.try_get(3)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct AffectedInterval {
     pub sequence_id: String,
     pub range: TimeRange,
@@ -890,6 +1394,10 @@ pub struct EditAck {
     pub semantic_digest: Option<String>,
     pub reason: Option<String>,
     pub footprint: Option<ChangeFootprint>,
+    pub project_id: String,
+    pub graph_id: String,
+    pub authority_incarnation_id: String,
+    pub replayed: bool,
     pub wire_residual: Vec<(i64, Cbor)>,
 }
 impl EditAck {
@@ -903,6 +1411,10 @@ impl EditAck {
             (4, match &self.semantic_digest { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
             (5, match &self.reason { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
             (6, match &self.footprint { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (7, Cbor::Text(self.project_id.clone())),
+            (8, Cbor::Text(self.graph_id.clone())),
+            (9, Cbor::Text(self.authority_incarnation_id.clone())),
+            (10, Cbor::Bool(self.replayed)),
         ];
         for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
         Cbor::Map(m)
@@ -915,7 +1427,11 @@ impl EditAck {
             semantic_digest: { let v = c.try_get(4)?; if v.is_null() { None } else { Some(v.try_text()?) } },
             reason: { let v = c.try_get(5)?; if v.is_null() { None } else { Some(v.try_text()?) } },
             footprint: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(ChangeFootprint::from_cbor(v)?) } },
-            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6)).map(|(t, v)| (*t, v.clone())).collect(),
+            project_id: c.try_get(7)?.try_text()?,
+            graph_id: c.try_get(8)?.try_text()?,
+            authority_incarnation_id: c.try_get(9)?.try_text()?,
+            replayed: c.try_get(10)?.try_bool()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10)).map(|(t, v)| (*t, v.clone())).collect(),
         })
     }
     pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
@@ -931,6 +1447,7 @@ pub struct AcceptedChange {
     pub to_revision: i64,
     pub operations: Vec<EditOperation>,
     pub footprint: ChangeFootprint,
+    pub project_id: String,
     pub wire_residual: Vec<(i64, Cbor)>,
 }
 impl AcceptedChange {
@@ -944,6 +1461,7 @@ impl AcceptedChange {
             (4, Cbor::Int(self.to_revision)),
             (5, Cbor::Array(self.operations.iter().map(|x| x.to_cbor()).collect())),
             (6, self.footprint.to_cbor()),
+            (7, Cbor::Text(self.project_id.clone())),
         ];
         for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
         Cbor::Map(m)
@@ -956,7 +1474,1573 @@ impl AcceptedChange {
             to_revision: c.try_get(4)?.try_int()?,
             operations: c.try_get(5)?.try_array()?.iter().map(|x| EditOperation::from_cbor(x)).collect::<Result<Vec<_>, DecodeError>>()?,
             footprint: ChangeFootprint::from_cbor(c.try_get(6)?)?,
+            project_id: c.try_get(7)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct GraphChangeEvent {
+    pub kind: GraphEventKind,
+    pub project_id: String,
+    pub graph_id: String,
+    pub authority_incarnation_id: String,
+    pub revision: i64,
+    pub first_available_revision: i64,
+    pub change: Option<AcceptedChange>,
+    pub reason: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl GraphChangeEvent {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.kind.wire())),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Int(self.revision)),
+            (6, Cbor::Int(self.first_available_revision)),
+            (7, match &self.change { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (8, match &self.reason { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            kind: GraphEventKind::from_wire(c.try_get(1)?.try_int()?)?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            revision: c.try_get(5)?.try_int()?,
+            first_available_revision: c.try_get(6)?.try_int()?,
+            change: { let v = c.try_get(7)?; if v.is_null() { None } else { Some(AcceptedChange::from_cbor(v)?) } },
+            reason: { let v = c.try_get(8)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct InsertSourceSpan {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub sequence_id: String,
+    pub authority_incarnation_id: String,
+    pub command_id: String,
+    pub expected_revision: i64,
+    pub target_track_id: String,
+    pub timeline_at: Rational,
+    pub placement: PlacementMode,
+    pub slot_id: Option<String>,
+    pub stream_id: String,
+    pub source_range: TimeRange,
+    pub speed: Rational,
+    pub expected_binding_set_id: String,
+    pub undo_group_id: String,
+    pub writer_capability: String,
+    pub registered_asset_id: Option<String>,
+    pub asset_version_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl InsertSourceSpan {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.sequence_id.clone())),
+            (5, Cbor::Text(self.authority_incarnation_id.clone())),
+            (6, Cbor::Text(self.command_id.clone())),
+            (7, Cbor::Int(self.expected_revision)),
+            (8, Cbor::Text(self.target_track_id.clone())),
+            (9, self.timeline_at.to_cbor()),
+            (10, Cbor::Int(self.placement.wire())),
+            (11, match &self.slot_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (12, Cbor::Text(self.stream_id.clone())),
+            (13, self.source_range.to_cbor()),
+            (14, self.speed.to_cbor()),
+            (15, Cbor::Text(self.expected_binding_set_id.clone())),
+            (16, Cbor::Text(self.undo_group_id.clone())),
+            (17, Cbor::Text(self.writer_capability.clone())),
+            (18, match &self.registered_asset_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (19, match &self.asset_version_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            sequence_id: c.try_get(4)?.try_text()?,
+            authority_incarnation_id: c.try_get(5)?.try_text()?,
+            command_id: c.try_get(6)?.try_text()?,
+            expected_revision: c.try_get(7)?.try_int()?,
+            target_track_id: c.try_get(8)?.try_text()?,
+            timeline_at: Rational::from_cbor(c.try_get(9)?)?,
+            placement: PlacementMode::from_wire(c.try_get(10)?.try_int()?)?,
+            slot_id: { let v = c.try_get(11)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            stream_id: c.try_get(12)?.try_text()?,
+            source_range: TimeRange::from_cbor(c.try_get(13)?)?,
+            speed: Rational::from_cbor(c.try_get(14)?)?,
+            expected_binding_set_id: c.try_get(15)?.try_text()?,
+            undo_group_id: c.try_get(16)?.try_text()?,
+            writer_capability: c.try_get(17)?.try_text()?,
+            registered_asset_id: { let v = c.try_get(18)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            asset_version_id: { let v = c.try_get(19)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct HistoryIntent {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub sequence_id: String,
+    pub authority_incarnation_id: String,
+    pub command_id: String,
+    pub expected_revision: i64,
+    pub target_undo_group_id: String,
+    pub expected_binding_set_id: String,
+    pub writer_capability: String,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl HistoryIntent {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.sequence_id.clone())),
+            (5, Cbor::Text(self.authority_incarnation_id.clone())),
+            (6, Cbor::Text(self.command_id.clone())),
+            (7, Cbor::Int(self.expected_revision)),
+            (8, Cbor::Text(self.target_undo_group_id.clone())),
+            (9, Cbor::Text(self.expected_binding_set_id.clone())),
+            (10, Cbor::Text(self.writer_capability.clone())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            sequence_id: c.try_get(4)?.try_text()?,
+            authority_incarnation_id: c.try_get(5)?.try_text()?,
+            command_id: c.try_get(6)?.try_text()?,
+            expected_revision: c.try_get(7)?.try_int()?,
+            target_undo_group_id: c.try_get(8)?.try_text()?,
+            expected_binding_set_id: c.try_get(9)?.try_text()?,
+            writer_capability: c.try_get(10)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct UndoGroupSummary {
+    pub group_id: String,
+    pub sequence_id: String,
+    pub label: String,
+    pub command_id: String,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl UndoGroupSummary {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Text(self.group_id.clone())),
+            (2, Cbor::Text(self.sequence_id.clone())),
+            (3, Cbor::Text(self.label.clone())),
+            (4, Cbor::Text(self.command_id.clone())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            group_id: c.try_get(1)?.try_text()?,
+            sequence_id: c.try_get(2)?.try_text()?,
+            label: c.try_get(3)?.try_text()?,
+            command_id: c.try_get(4)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct HistoryState {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub sequence_id: String,
+    pub authority_incarnation_id: String,
+    pub revision: i64,
+    pub undo_groups: Vec<UndoGroupSummary>,
+    pub redo_groups: Vec<UndoGroupSummary>,
+    pub can_undo: bool,
+    pub can_redo: bool,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl HistoryState {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.sequence_id.clone())),
+            (5, Cbor::Text(self.authority_incarnation_id.clone())),
+            (6, Cbor::Int(self.revision)),
+            (7, Cbor::Array(self.undo_groups.iter().map(|x| x.to_cbor()).collect())),
+            (8, Cbor::Array(self.redo_groups.iter().map(|x| x.to_cbor()).collect())),
+            (9, Cbor::Bool(self.can_undo)),
+            (10, Cbor::Bool(self.can_redo)),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            sequence_id: c.try_get(4)?.try_text()?,
+            authority_incarnation_id: c.try_get(5)?.try_text()?,
+            revision: c.try_get(6)?.try_int()?,
+            undo_groups: c.try_get(7)?.try_array()?.iter().map(|x| UndoGroupSummary::from_cbor(x)).collect::<Result<Vec<_>, DecodeError>>()?,
+            redo_groups: c.try_get(8)?.try_array()?.iter().map(|x| UndoGroupSummary::from_cbor(x)).collect::<Result<Vec<_>, DecodeError>>()?,
+            can_undo: c.try_get(9)?.try_bool()?,
+            can_redo: c.try_get(10)?.try_bool()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct EditorAck {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub sequence_id: String,
+    pub authority_incarnation_id: String,
+    pub command_id: String,
+    pub status: EditorStatus,
+    pub replayed: bool,
+    pub revision: i64,
+    pub binding_set_id: String,
+    pub footprint: Option<ChangeFootprint>,
+    pub diagnostic_id: Option<String>,
+    pub binding_revision: i64,
+    pub created_slot_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl EditorAck {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.sequence_id.clone())),
+            (5, Cbor::Text(self.authority_incarnation_id.clone())),
+            (6, Cbor::Text(self.command_id.clone())),
+            (7, Cbor::Int(self.status.wire())),
+            (8, Cbor::Bool(self.replayed)),
+            (9, Cbor::Int(self.revision)),
+            (10, Cbor::Text(self.binding_set_id.clone())),
+            (11, match &self.footprint { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (12, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (13, Cbor::Int(self.binding_revision)),
+            (14, match &self.created_slot_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            sequence_id: c.try_get(4)?.try_text()?,
+            authority_incarnation_id: c.try_get(5)?.try_text()?,
+            command_id: c.try_get(6)?.try_text()?,
+            status: EditorStatus::from_wire(c.try_get(7)?.try_int()?)?,
+            replayed: c.try_get(8)?.try_bool()?,
+            revision: c.try_get(9)?.try_int()?,
+            binding_set_id: c.try_get(10)?.try_text()?,
+            footprint: { let v = c.try_get(11)?; if v.is_null() { None } else { Some(ChangeFootprint::from_cbor(v)?) } },
+            diagnostic_id: { let v = c.try_get(12)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            binding_revision: c.try_get(13)?.try_int()?,
+            created_slot_id: { let v = c.try_get(14)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct CatalogStream {
+    pub id: String,
+    pub media: MediaKind,
+    pub duration: Rational,
+    pub pts_origin: Rational,
+    pub frame_count: Option<i64>,
+    pub frame_index_id: Option<String>,
+    pub index_status: IndexStatus,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl CatalogStream {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Text(self.id.clone())),
+            (2, Cbor::Int(self.media.wire())),
+            (3, self.duration.to_cbor()),
+            (4, self.pts_origin.to_cbor()),
+            (5, match &self.frame_count { Some(v) => Cbor::Int(*v), None => Cbor::Null }),
+            (6, match &self.frame_index_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (7, Cbor::Int(self.index_status.wire())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            id: c.try_get(1)?.try_text()?,
+            media: MediaKind::from_wire(c.try_get(2)?.try_int()?)?,
+            duration: Rational::from_cbor(c.try_get(3)?)?,
+            pts_origin: Rational::from_cbor(c.try_get(4)?)?,
+            frame_count: { let v = c.try_get(5)?; if v.is_null() { None } else { Some(v.try_int()?) } },
+            frame_index_id: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            index_status: IndexStatus::from_wire(c.try_get(7)?.try_int()?)?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct RegisteredAsset {
+    pub id: String,
+    pub version_id: String,
+    pub content_fingerprint: String,
+    pub display_name: String,
+    pub streams: std::collections::BTreeMap<String, CatalogStream>,
+    pub availability: AssetAvailability,
+    pub diagnostic_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl RegisteredAsset {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Text(self.id.clone())),
+            (2, Cbor::Text(self.version_id.clone())),
+            (3, Cbor::Text(self.content_fingerprint.clone())),
+            (4, Cbor::Text(self.display_name.clone())),
+            (5, Cbor::Array(self.streams.iter().map(|(k, v)| Cbor::Map(vec![(1, Cbor::Text(k.clone())), (2, v.to_cbor())])).collect())),
+            (6, Cbor::Int(self.availability.wire())),
+            (7, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            id: c.try_get(1)?.try_text()?,
+            version_id: c.try_get(2)?.try_text()?,
+            content_fingerprint: c.try_get(3)?.try_text()?,
+            display_name: c.try_get(4)?.try_text()?,
+            streams: { let mut m = std::collections::BTreeMap::new(); for e in c.try_get(5)?.try_array()? { let ek = e.try_get(1)?; let ev = e.try_get(2)?; let k = ek.try_text()?; if m.contains_key(&k) { return Err(DecodeError::DuplicateMapKey(k.into())); } m.insert(k, CatalogStream::from_cbor(ev)?); } m },
+            availability: AssetAvailability::from_wire(c.try_get(6)?.try_int()?)?,
+            diagnostic_id: { let v = c.try_get(7)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct CatalogSnapshot {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub authority_incarnation_id: String,
+    pub catalog_revision: i64,
+    pub assets: std::collections::BTreeMap<String, RegisteredAsset>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl CatalogSnapshot {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.authority_incarnation_id.clone())),
+            (4, Cbor::Int(self.catalog_revision)),
+            (5, Cbor::Array(self.assets.iter().map(|(k, v)| Cbor::Map(vec![(1, Cbor::Text(k.clone())), (2, v.to_cbor())])).collect())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            authority_incarnation_id: c.try_get(3)?.try_text()?,
+            catalog_revision: c.try_get(4)?.try_int()?,
+            assets: { let mut m = std::collections::BTreeMap::new(); for e in c.try_get(5)?.try_array()? { let ek = e.try_get(1)?; let ev = e.try_get(2)?; let k = ek.try_text()?; if m.contains_key(&k) { return Err(DecodeError::DuplicateMapKey(k.into())); } m.insert(k, RegisteredAsset::from_cbor(ev)?); } m },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct CatalogChange {
+    pub project_id: String,
+    pub from_catalog_revision: i64,
+    pub to_catalog_revision: i64,
+    pub upserts: std::collections::BTreeMap<String, RegisteredAsset>,
+    pub removed_asset_ids: Vec<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl CatalogChange {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Text(self.project_id.clone())),
+            (2, Cbor::Int(self.from_catalog_revision)),
+            (3, Cbor::Int(self.to_catalog_revision)),
+            (4, Cbor::Array(self.upserts.iter().map(|(k, v)| Cbor::Map(vec![(1, Cbor::Text(k.clone())), (2, v.to_cbor())])).collect())),
+            (5, Cbor::Array(self.removed_asset_ids.iter().map(|x| Cbor::Text(x.clone())).collect())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            project_id: c.try_get(1)?.try_text()?,
+            from_catalog_revision: c.try_get(2)?.try_int()?,
+            to_catalog_revision: c.try_get(3)?.try_int()?,
+            upserts: { let mut m = std::collections::BTreeMap::new(); for e in c.try_get(4)?.try_array()? { let ek = e.try_get(1)?; let ev = e.try_get(2)?; let k = ek.try_text()?; if m.contains_key(&k) { return Err(DecodeError::DuplicateMapKey(k.into())); } m.insert(k, RegisteredAsset::from_cbor(ev)?); } m },
+            removed_asset_ids: c.try_get(5)?.try_array()?.iter().map(|x| Ok(x.try_text()?)).collect::<Result<Vec<_>, DecodeError>>()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct CatalogChangeEvent {
+    pub kind: CatalogEventKind,
+    pub project_id: String,
+    pub authority_incarnation_id: String,
+    pub catalog_revision: i64,
+    pub first_available_revision: i64,
+    pub change: Option<CatalogChange>,
+    pub reason: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl CatalogChangeEvent {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.kind.wire())),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.authority_incarnation_id.clone())),
+            (4, Cbor::Int(self.catalog_revision)),
+            (5, Cbor::Int(self.first_available_revision)),
+            (6, match &self.change { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (7, match &self.reason { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            kind: CatalogEventKind::from_wire(c.try_get(1)?.try_int()?)?,
+            project_id: c.try_get(2)?.try_text()?,
+            authority_incarnation_id: c.try_get(3)?.try_text()?,
+            catalog_revision: c.try_get(4)?.try_int()?,
+            first_available_revision: c.try_get(5)?.try_int()?,
+            change: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(CatalogChange::from_cbor(v)?) } },
+            reason: { let v = c.try_get(7)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct FrameIndexQuery {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub authority_incarnation_id: String,
+    pub registered_asset_id: String,
+    pub asset_version_id: String,
+    pub stream_id: String,
+    pub frame_index: i64,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl FrameIndexQuery {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.authority_incarnation_id.clone())),
+            (4, Cbor::Text(self.registered_asset_id.clone())),
+            (5, Cbor::Text(self.asset_version_id.clone())),
+            (6, Cbor::Text(self.stream_id.clone())),
+            (7, Cbor::Int(self.frame_index)),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            authority_incarnation_id: c.try_get(3)?.try_text()?,
+            registered_asset_id: c.try_get(4)?.try_text()?,
+            asset_version_id: c.try_get(5)?.try_text()?,
+            stream_id: c.try_get(6)?.try_text()?,
+            frame_index: c.try_get(7)?.try_int()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct FrameIndexResult {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub authority_incarnation_id: String,
+    pub registered_asset_id: String,
+    pub asset_version_id: String,
+    pub stream_id: String,
+    pub frame_index: i64,
+    pub status: FrameLookupStatus,
+    pub pts: Option<Rational>,
+    pub frame_count: Option<i64>,
+    pub content_fingerprint: Option<String>,
+    pub diagnostic_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl FrameIndexResult {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.authority_incarnation_id.clone())),
+            (4, Cbor::Text(self.registered_asset_id.clone())),
+            (5, Cbor::Text(self.asset_version_id.clone())),
+            (6, Cbor::Text(self.stream_id.clone())),
+            (7, Cbor::Int(self.frame_index)),
+            (8, Cbor::Int(self.status.wire())),
+            (9, match &self.pts { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (10, match &self.frame_count { Some(v) => Cbor::Int(*v), None => Cbor::Null }),
+            (11, match &self.content_fingerprint { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (12, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            authority_incarnation_id: c.try_get(3)?.try_text()?,
+            registered_asset_id: c.try_get(4)?.try_text()?,
+            asset_version_id: c.try_get(5)?.try_text()?,
+            stream_id: c.try_get(6)?.try_text()?,
+            frame_index: c.try_get(7)?.try_int()?,
+            status: FrameLookupStatus::from_wire(c.try_get(8)?.try_int()?)?,
+            pts: { let v = c.try_get(9)?; if v.is_null() { None } else { Some(Rational::from_cbor(v)?) } },
+            frame_count: { let v = c.try_get(10)?; if v.is_null() { None } else { Some(v.try_int()?) } },
+            content_fingerprint: { let v = c.try_get(11)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            diagnostic_id: { let v = c.try_get(12)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct AssetBinding {
+    pub slot_id: String,
+    pub registered_asset_id: String,
+    pub asset_version_id: String,
+    pub stream_id: String,
+    pub content_fingerprint: String,
+    pub media: MediaKind,
+    pub duration: Rational,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl AssetBinding {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Text(self.slot_id.clone())),
+            (2, Cbor::Text(self.registered_asset_id.clone())),
+            (3, Cbor::Text(self.asset_version_id.clone())),
+            (4, Cbor::Text(self.stream_id.clone())),
+            (5, Cbor::Text(self.content_fingerprint.clone())),
+            (6, Cbor::Int(self.media.wire())),
+            (7, self.duration.to_cbor()),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            slot_id: c.try_get(1)?.try_text()?,
+            registered_asset_id: c.try_get(2)?.try_text()?,
+            asset_version_id: c.try_get(3)?.try_text()?,
+            stream_id: c.try_get(4)?.try_text()?,
+            content_fingerprint: c.try_get(5)?.try_text()?,
+            media: MediaKind::from_wire(c.try_get(6)?.try_int()?)?,
+            duration: Rational::from_cbor(c.try_get(7)?)?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct BindingSnapshot {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub authority_incarnation_id: String,
+    pub binding_set_id: String,
+    pub binding_revision: i64,
+    pub bindings: std::collections::BTreeMap<String, AssetBinding>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl BindingSnapshot {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Text(self.binding_set_id.clone())),
+            (6, Cbor::Int(self.binding_revision)),
+            (7, Cbor::Array(self.bindings.iter().map(|(k, v)| Cbor::Map(vec![(1, Cbor::Text(k.clone())), (2, v.to_cbor())])).collect())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            binding_set_id: c.try_get(5)?.try_text()?,
+            binding_revision: c.try_get(6)?.try_int()?,
+            bindings: { let mut m = std::collections::BTreeMap::new(); for e in c.try_get(7)?.try_array()? { let ek = e.try_get(1)?; let ev = e.try_get(2)?; let k = ek.try_text()?; if m.contains_key(&k) { return Err(DecodeError::DuplicateMapKey(k.into())); } m.insert(k, AssetBinding::from_cbor(ev)?); } m },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct BindingPolicy {
+    pub duration: DurationPolicy,
+    pub frame_rate: FrameRatePolicy,
+    pub aspect: AspectPolicy,
+    pub channels: ChannelPolicy,
+    pub missing_range: MissingRangePolicy,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl BindingPolicy {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.duration.wire())),
+            (2, Cbor::Int(self.frame_rate.wire())),
+            (3, Cbor::Int(self.aspect.wire())),
+            (4, Cbor::Int(self.channels.wire())),
+            (5, Cbor::Int(self.missing_range.wire())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            duration: DurationPolicy::from_wire(c.try_get(1)?.try_int()?)?,
+            frame_rate: FrameRatePolicy::from_wire(c.try_get(2)?.try_int()?)?,
+            aspect: AspectPolicy::from_wire(c.try_get(3)?.try_int()?)?,
+            channels: ChannelPolicy::from_wire(c.try_get(4)?.try_int()?)?,
+            missing_range: MissingRangePolicy::from_wire(c.try_get(5)?.try_int()?)?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct RebindSlot {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub authority_incarnation_id: String,
+    pub command_id: String,
+    pub expected_graph_revision: i64,
+    pub expected_binding_set_id: String,
+    pub slot_id: String,
+    pub registered_asset_id: String,
+    pub asset_version_id: String,
+    pub stream_id: String,
+    pub policy: BindingPolicy,
+    pub writer_capability: String,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl RebindSlot {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Text(self.command_id.clone())),
+            (6, Cbor::Int(self.expected_graph_revision)),
+            (7, Cbor::Text(self.expected_binding_set_id.clone())),
+            (8, Cbor::Text(self.slot_id.clone())),
+            (9, Cbor::Text(self.registered_asset_id.clone())),
+            (10, Cbor::Text(self.asset_version_id.clone())),
+            (11, Cbor::Text(self.stream_id.clone())),
+            (12, self.policy.to_cbor()),
+            (13, Cbor::Text(self.writer_capability.clone())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            command_id: c.try_get(5)?.try_text()?,
+            expected_graph_revision: c.try_get(6)?.try_int()?,
+            expected_binding_set_id: c.try_get(7)?.try_text()?,
+            slot_id: c.try_get(8)?.try_text()?,
+            registered_asset_id: c.try_get(9)?.try_text()?,
+            asset_version_id: c.try_get(10)?.try_text()?,
+            stream_id: c.try_get(11)?.try_text()?,
+            policy: BindingPolicy::from_cbor(c.try_get(12)?)?,
+            writer_capability: c.try_get(13)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct BindingAck {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub authority_incarnation_id: String,
+    pub command_id: String,
+    pub status: BindingStatus,
+    pub replayed: bool,
+    pub graph_revision: i64,
+    pub binding_set_id: String,
+    pub binding_revision: i64,
+    pub footprint: Option<ChangeFootprint>,
+    pub diagnostic_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl BindingAck {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Text(self.command_id.clone())),
+            (6, Cbor::Int(self.status.wire())),
+            (7, Cbor::Bool(self.replayed)),
+            (8, Cbor::Int(self.graph_revision)),
+            (9, Cbor::Text(self.binding_set_id.clone())),
+            (10, Cbor::Int(self.binding_revision)),
+            (11, match &self.footprint { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (12, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            command_id: c.try_get(5)?.try_text()?,
+            status: BindingStatus::from_wire(c.try_get(6)?.try_int()?)?,
+            replayed: c.try_get(7)?.try_bool()?,
+            graph_revision: c.try_get(8)?.try_int()?,
+            binding_set_id: c.try_get(9)?.try_text()?,
+            binding_revision: c.try_get(10)?.try_int()?,
+            footprint: { let v = c.try_get(11)?; if v.is_null() { None } else { Some(ChangeFootprint::from_cbor(v)?) } },
+            diagnostic_id: { let v = c.try_get(12)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct BindingChange {
+    pub project_id: String,
+    pub graph_id: String,
+    pub from_binding_revision: i64,
+    pub to_binding_revision: i64,
+    pub from_binding_set_id: String,
+    pub to_binding_set_id: String,
+    pub changed_slot_ids: Vec<String>,
+    pub footprint: ChangeFootprint,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl BindingChange {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Text(self.project_id.clone())),
+            (2, Cbor::Text(self.graph_id.clone())),
+            (3, Cbor::Int(self.from_binding_revision)),
+            (4, Cbor::Int(self.to_binding_revision)),
+            (5, Cbor::Text(self.from_binding_set_id.clone())),
+            (6, Cbor::Text(self.to_binding_set_id.clone())),
+            (7, Cbor::Array(self.changed_slot_ids.iter().map(|x| Cbor::Text(x.clone())).collect())),
+            (8, self.footprint.to_cbor()),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            project_id: c.try_get(1)?.try_text()?,
+            graph_id: c.try_get(2)?.try_text()?,
+            from_binding_revision: c.try_get(3)?.try_int()?,
+            to_binding_revision: c.try_get(4)?.try_int()?,
+            from_binding_set_id: c.try_get(5)?.try_text()?,
+            to_binding_set_id: c.try_get(6)?.try_text()?,
+            changed_slot_ids: c.try_get(7)?.try_array()?.iter().map(|x| Ok(x.try_text()?)).collect::<Result<Vec<_>, DecodeError>>()?,
+            footprint: ChangeFootprint::from_cbor(c.try_get(8)?)?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct BindingChangeEvent {
+    pub kind: BindingEventKind,
+    pub project_id: String,
+    pub graph_id: String,
+    pub authority_incarnation_id: String,
+    pub binding_revision: i64,
+    pub first_available_revision: i64,
+    pub change: Option<BindingChange>,
+    pub reason: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl BindingChangeEvent {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.kind.wire())),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Int(self.binding_revision)),
+            (6, Cbor::Int(self.first_available_revision)),
+            (7, match &self.change { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (8, match &self.reason { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            kind: BindingEventKind::from_wire(c.try_get(1)?.try_int()?)?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            binding_revision: c.try_get(5)?.try_int()?,
+            first_available_revision: c.try_get(6)?.try_int()?,
+            change: { let v = c.try_get(7)?; if v.is_null() { None } else { Some(BindingChange::from_cbor(v)?) } },
+            reason: { let v = c.try_get(8)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct SourcePreviewRequest {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub authority_incarnation_id: String,
+    pub registered_asset_id: String,
+    pub asset_version_id: String,
+    pub stream_id: String,
+    pub request_id: String,
+    pub viewer_id: String,
+    pub cancel_group_id: String,
+    pub at: Rational,
+    pub fidelity: PreviewFidelity,
+    pub max_edge_px: i64,
+    pub expected_content_fingerprint: String,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl SourcePreviewRequest {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.authority_incarnation_id.clone())),
+            (4, Cbor::Text(self.registered_asset_id.clone())),
+            (5, Cbor::Text(self.asset_version_id.clone())),
+            (6, Cbor::Text(self.stream_id.clone())),
+            (7, Cbor::Text(self.request_id.clone())),
+            (8, Cbor::Text(self.viewer_id.clone())),
+            (9, Cbor::Text(self.cancel_group_id.clone())),
+            (10, self.at.to_cbor()),
+            (11, Cbor::Int(self.fidelity.wire())),
+            (12, Cbor::Int(self.max_edge_px)),
+            (13, Cbor::Text(self.expected_content_fingerprint.clone())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            authority_incarnation_id: c.try_get(3)?.try_text()?,
+            registered_asset_id: c.try_get(4)?.try_text()?,
+            asset_version_id: c.try_get(5)?.try_text()?,
+            stream_id: c.try_get(6)?.try_text()?,
+            request_id: c.try_get(7)?.try_text()?,
+            viewer_id: c.try_get(8)?.try_text()?,
+            cancel_group_id: c.try_get(9)?.try_text()?,
+            at: Rational::from_cbor(c.try_get(10)?)?,
+            fidelity: PreviewFidelity::from_wire(c.try_get(11)?.try_int()?)?,
+            max_edge_px: c.try_get(12)?.try_int()?,
+            expected_content_fingerprint: c.try_get(13)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct SequencePreviewRequest {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub sequence_id: String,
+    pub authority_incarnation_id: String,
+    pub accepted_revision: i64,
+    pub binding_set_id: String,
+    pub binding_revision: i64,
+    pub request_id: String,
+    pub viewer_id: String,
+    pub cancel_group_id: String,
+    pub at: Rational,
+    pub fidelity: PreviewFidelity,
+    pub max_edge_px: i64,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl SequencePreviewRequest {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.sequence_id.clone())),
+            (5, Cbor::Text(self.authority_incarnation_id.clone())),
+            (6, Cbor::Int(self.accepted_revision)),
+            (7, Cbor::Text(self.binding_set_id.clone())),
+            (8, Cbor::Int(self.binding_revision)),
+            (9, Cbor::Text(self.request_id.clone())),
+            (10, Cbor::Text(self.viewer_id.clone())),
+            (11, Cbor::Text(self.cancel_group_id.clone())),
+            (12, self.at.to_cbor()),
+            (13, Cbor::Int(self.fidelity.wire())),
+            (14, Cbor::Int(self.max_edge_px)),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            sequence_id: c.try_get(4)?.try_text()?,
+            authority_incarnation_id: c.try_get(5)?.try_text()?,
+            accepted_revision: c.try_get(6)?.try_int()?,
+            binding_set_id: c.try_get(7)?.try_text()?,
+            binding_revision: c.try_get(8)?.try_int()?,
+            request_id: c.try_get(9)?.try_text()?,
+            viewer_id: c.try_get(10)?.try_text()?,
+            cancel_group_id: c.try_get(11)?.try_text()?,
+            at: Rational::from_cbor(c.try_get(12)?)?,
+            fidelity: PreviewFidelity::from_wire(c.try_get(13)?.try_int()?)?,
+            max_edge_px: c.try_get(14)?.try_int()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct ResourceDescriptor {
+    pub resource_id: String,
+    pub lease_id: String,
+    pub mime_type: String,
+    pub width: i64,
+    pub height: i64,
+    pub byte_length: i64,
+    pub expires_at_unix_ms: i64,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl ResourceDescriptor {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Text(self.resource_id.clone())),
+            (2, Cbor::Text(self.lease_id.clone())),
+            (3, Cbor::Text(self.mime_type.clone())),
+            (4, Cbor::Int(self.width)),
+            (5, Cbor::Int(self.height)),
+            (6, Cbor::Int(self.byte_length)),
+            (7, Cbor::Int(self.expires_at_unix_ms)),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            resource_id: c.try_get(1)?.try_text()?,
+            lease_id: c.try_get(2)?.try_text()?,
+            mime_type: c.try_get(3)?.try_text()?,
+            width: c.try_get(4)?.try_int()?,
+            height: c.try_get(5)?.try_int()?,
+            byte_length: c.try_get(6)?.try_int()?,
+            expires_at_unix_ms: c.try_get(7)?.try_int()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct SourcePreviewResult {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub authority_incarnation_id: String,
+    pub registered_asset_id: String,
+    pub asset_version_id: String,
+    pub stream_id: String,
+    pub request_id: String,
+    pub viewer_id: String,
+    pub cancel_group_id: String,
+    pub status: PreviewStatus,
+    pub fidelity: PreviewFidelity,
+    pub actual_time: Option<Rational>,
+    pub resource: Option<ResourceDescriptor>,
+    pub error_code: Option<String>,
+    pub diagnostic_id: Option<String>,
+    pub content_fingerprint: String,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl SourcePreviewResult {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.authority_incarnation_id.clone())),
+            (4, Cbor::Text(self.registered_asset_id.clone())),
+            (5, Cbor::Text(self.asset_version_id.clone())),
+            (6, Cbor::Text(self.stream_id.clone())),
+            (7, Cbor::Text(self.request_id.clone())),
+            (8, Cbor::Text(self.viewer_id.clone())),
+            (9, Cbor::Text(self.cancel_group_id.clone())),
+            (10, Cbor::Int(self.status.wire())),
+            (11, Cbor::Int(self.fidelity.wire())),
+            (12, match &self.actual_time { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (13, match &self.resource { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (14, match &self.error_code { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (15, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (16, Cbor::Text(self.content_fingerprint.clone())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            authority_incarnation_id: c.try_get(3)?.try_text()?,
+            registered_asset_id: c.try_get(4)?.try_text()?,
+            asset_version_id: c.try_get(5)?.try_text()?,
+            stream_id: c.try_get(6)?.try_text()?,
+            request_id: c.try_get(7)?.try_text()?,
+            viewer_id: c.try_get(8)?.try_text()?,
+            cancel_group_id: c.try_get(9)?.try_text()?,
+            status: PreviewStatus::from_wire(c.try_get(10)?.try_int()?)?,
+            fidelity: PreviewFidelity::from_wire(c.try_get(11)?.try_int()?)?,
+            actual_time: { let v = c.try_get(12)?; if v.is_null() { None } else { Some(Rational::from_cbor(v)?) } },
+            resource: { let v = c.try_get(13)?; if v.is_null() { None } else { Some(ResourceDescriptor::from_cbor(v)?) } },
+            error_code: { let v = c.try_get(14)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            diagnostic_id: { let v = c.try_get(15)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            content_fingerprint: c.try_get(16)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct SequencePreviewResult {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub sequence_id: String,
+    pub authority_incarnation_id: String,
+    pub accepted_revision: i64,
+    pub binding_set_id: String,
+    pub binding_revision: i64,
+    pub request_id: String,
+    pub viewer_id: String,
+    pub cancel_group_id: String,
+    pub status: PreviewStatus,
+    pub fidelity: PreviewFidelity,
+    pub actual_time: Option<Rational>,
+    pub plan_id: Option<String>,
+    pub resource: Option<ResourceDescriptor>,
+    pub error_code: Option<String>,
+    pub diagnostic_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl SequencePreviewResult {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.sequence_id.clone())),
+            (5, Cbor::Text(self.authority_incarnation_id.clone())),
+            (6, Cbor::Int(self.accepted_revision)),
+            (7, Cbor::Text(self.binding_set_id.clone())),
+            (8, Cbor::Int(self.binding_revision)),
+            (9, Cbor::Text(self.request_id.clone())),
+            (10, Cbor::Text(self.viewer_id.clone())),
+            (11, Cbor::Text(self.cancel_group_id.clone())),
+            (12, Cbor::Int(self.status.wire())),
+            (13, Cbor::Int(self.fidelity.wire())),
+            (14, match &self.actual_time { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (15, match &self.plan_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (16, match &self.resource { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (17, match &self.error_code { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (18, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            sequence_id: c.try_get(4)?.try_text()?,
+            authority_incarnation_id: c.try_get(5)?.try_text()?,
+            accepted_revision: c.try_get(6)?.try_int()?,
+            binding_set_id: c.try_get(7)?.try_text()?,
+            binding_revision: c.try_get(8)?.try_int()?,
+            request_id: c.try_get(9)?.try_text()?,
+            viewer_id: c.try_get(10)?.try_text()?,
+            cancel_group_id: c.try_get(11)?.try_text()?,
+            status: PreviewStatus::from_wire(c.try_get(12)?.try_int()?)?,
+            fidelity: PreviewFidelity::from_wire(c.try_get(13)?.try_int()?)?,
+            actual_time: { let v = c.try_get(14)?; if v.is_null() { None } else { Some(Rational::from_cbor(v)?) } },
+            plan_id: { let v = c.try_get(15)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            resource: { let v = c.try_get(16)?; if v.is_null() { None } else { Some(ResourceDescriptor::from_cbor(v)?) } },
+            error_code: { let v = c.try_get(17)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            diagnostic_id: { let v = c.try_get(18)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct CancelPreview {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: Option<String>,
+    pub authority_incarnation_id: String,
+    pub request_id: String,
+    pub viewer_id: String,
+    pub cancel_group_id: String,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl CancelPreview {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, match &self.graph_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Text(self.request_id.clone())),
+            (6, Cbor::Text(self.viewer_id.clone())),
+            (7, Cbor::Text(self.cancel_group_id.clone())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: { let v = c.try_get(3)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            request_id: c.try_get(5)?.try_text()?,
+            viewer_id: c.try_get(6)?.try_text()?,
+            cancel_group_id: c.try_get(7)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct ReleaseResource {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: Option<String>,
+    pub authority_incarnation_id: String,
+    pub lease_id: String,
+    pub viewer_id: String,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl ReleaseResource {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, match &self.graph_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Text(self.lease_id.clone())),
+            (6, Cbor::Text(self.viewer_id.clone())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: { let v = c.try_get(3)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            lease_id: c.try_get(5)?.try_text()?,
+            viewer_id: c.try_get(6)?.try_text()?,
             wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct ResourceActionAck {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: Option<String>,
+    pub authority_incarnation_id: String,
+    pub action_id: String,
+    pub status: ResourceActionStatus,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl ResourceActionAck {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, match &self.graph_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Text(self.action_id.clone())),
+            (6, Cbor::Int(self.status.wire())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: { let v = c.try_get(3)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            action_id: c.try_get(5)?.try_text()?,
+            status: ResourceActionStatus::from_wire(c.try_get(6)?.try_int()?)?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct ProjectOpen {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: Option<String>,
+    pub authority_incarnation_id: String,
+    pub state: AuthorityState,
+    pub graph_revision: i64,
+    pub binding_set_id: Option<String>,
+    pub diagnostic_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl ProjectOpen {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, match &self.graph_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Int(self.state.wire())),
+            (6, Cbor::Int(self.graph_revision)),
+            (7, match &self.binding_set_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (8, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: { let v = c.try_get(3)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            state: AuthorityState::from_wire(c.try_get(5)?.try_int()?)?,
+            graph_revision: c.try_get(6)?.try_int()?,
+            binding_set_id: { let v = c.try_get(7)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            diagnostic_id: { let v = c.try_get(8)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct AcquireWriter {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub authority_incarnation_id: String,
+    pub request_id: String,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl AcquireWriter {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Text(self.request_id.clone())),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            request_id: c.try_get(5)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct WriterLease {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub graph_id: String,
+    pub authority_incarnation_id: String,
+    pub request_id: String,
+    pub status: LeaseStatus,
+    pub lease_id: Option<String>,
+    pub writer_capability: Option<String>,
+    pub expires_at_unix_ms: Option<i64>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl WriterLease {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.graph_id.clone())),
+            (4, Cbor::Text(self.authority_incarnation_id.clone())),
+            (5, Cbor::Text(self.request_id.clone())),
+            (6, Cbor::Int(self.status.wire())),
+            (7, match &self.lease_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (8, match &self.writer_capability { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (9, match &self.expires_at_unix_ms { Some(v) => Cbor::Int(*v), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            graph_id: c.try_get(3)?.try_text()?,
+            authority_incarnation_id: c.try_get(4)?.try_text()?,
+            request_id: c.try_get(5)?.try_text()?,
+            status: LeaseStatus::from_wire(c.try_get(6)?.try_int()?)?,
+            lease_id: { let v = c.try_get(7)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            writer_capability: { let v = c.try_get(8)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            expires_at_unix_ms: { let v = c.try_get(9)?; if v.is_null() { None } else { Some(v.try_int()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9)).map(|(t, v)| (*t, v.clone())).collect(),
         })
     }
     pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {

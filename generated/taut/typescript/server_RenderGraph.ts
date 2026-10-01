@@ -1,10 +1,11 @@
 // GENERATED server stubs: a handler interface + IR-driven registration.
 import type * as api from "./api.ts";
+import type { ApplyGraphBatch } from "./api.ts";
 
 export interface RenderGraphHandlers {
-  snapshot(project_id: string, graph_id: string): Promise<api.GraphSnapshot>;
-  apply(batch: EditBatch): Promise<api.EditAck>;
-  changes(project_id: string, graph_id: string): unknown;  // Subscription (log)
+  snapshot(project_id: string, graph_id: string): Promise<api.GraphSnapshotDelivery>;
+  apply(request: ApplyGraphBatch): Promise<api.EditAck>;
+  changes(project_id: string, graph_id: string, authority_incarnation_id: string, after_revision: bigint): unknown;  // Subscription (log)
 }
 
 // Register against the IR (the transport reads kind/params from the contract):

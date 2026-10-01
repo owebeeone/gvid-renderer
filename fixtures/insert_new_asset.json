@@ -1,0 +1,36 @@
+{
+  "asset_version_id": "asset-d-v1",
+  "authority_incarnation_id": "open-1",
+  "command_id": "cmd-insert-new-1",
+  "contract_version": 1,
+  "expected_binding_set_id": "bind-1",
+  "expected_revision": 8,
+  "graph_id": "g1",
+  "placement": "ripple_track",
+  "project_id": "p1",
+  "registered_asset_id": "asset-d",
+  "sequence_id": "s1",
+  "slot_id": null,
+  "source_range": {
+    "end": {
+      "denominator": 1,
+      "numerator": 1
+    },
+    "start": {
+      "denominator": 1,
+      "numerator": 0
+    }
+  },
+  "speed": {
+    "denominator": 1,
+    "numerator": 1
+  },
+  "stream_id": "video-0",
+  "target_track_id": "v1",
+  "timeline_at": {
+    "denominator": 1,
+    "numerator": 1
+  },
+  "undo_group_id": "gesture-1",
+  "writer_capability": "fixture-only-capability"
+}
