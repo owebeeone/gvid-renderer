@@ -113,7 +113,7 @@ The first schema design should define these records and their compatibility rule
 | GVR-RDR-013 | The renderer MUST use a pinned or validated media toolchain and record the versions and build configuration used for an export. It MUST NOT silently select an arbitrary executable from the user's path. | GVR-CON-005; GVR-NFR-PORT-004; GVR-NFR-LIC-001 |
 | GVR-RDR-014 | Hardware execution MAY be chosen only from a host-validated complete decode, filter, and encode path for the requested profile. If that path fails, fallback to the software reference path SHOULD occur when policy and user intent permit, with the change recorded. | GVR-REND-011-012; GVR-NFR-PORT-002 |
 | GVR-RDR-015 | Packet-copy or smart-render execution MUST use conservative eligibility checks and output verification. Ineligible work MUST use the normal render path without changing the requested composition. | GVR-REND-013 |
-| GVR-RDR-016 | Reused intermediate renders SHOULD be keyed by every semantic input and toolchain version needed for safe reuse. Invalid or corrupt intermediates MUST be regenerated or fail clearly. | GVR-REND-014; GVR-NFR-REL-003; GVR-NFR-MNT-005 |
+| GVR-RDR-016 | When an intermediate render is reused, its cache identity and validation metadata MUST identify every semantic input and toolchain version needed for safe reuse, including asset-binding fingerprints. The renderer MUST compare that identity and metadata with the consuming request before reuse. Incomplete, mismatched, invalid, or corrupt intermediates MUST be treated as cache misses and regenerated, or fail clearly when regeneration is unavailable. | GVR-REND-014; GVR-NFR-REL-003; GVR-NFR-MNT-005 |
 
 ### Output integrity and evidence
 
@@ -151,6 +151,7 @@ These are required checks for implementation; this draft does not claim they hav
 17. Exchange representative edit, seek, cancellation, progress, and export messages between the browser and native runtimes using the pinned Taut schema; compare canonical wire bytes and decoded meaning.
 18. Send malformed, oversized, too-deep, stale-revision, and future-version Taut messages. Confirm bounded failure, no privileged action, and a correlated diagnostic.
 19. Evaluate a large layered graph with asset rebinding and incremental changes as a Taut saved document. Record size, decode cost, deterministic identity, migration behavior, and any reason to use a different durable format.
+20. Render a graph with asset slot S bound to source A and retain its intermediate. Rebind S to source B with the same duration, dimensions, streams, and timing but different content, then export the same graph and profile. Confirm A's intermediate cannot satisfy B's request, the output and export evidence identify B, and missing cache identity evidence causes regeneration or explicit failure. Repeat with a changed semantic effect parameter and toolchain version while the prior intermediate remains available.
 
 ## Open decisions and dependencies
 
