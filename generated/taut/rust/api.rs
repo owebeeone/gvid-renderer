@@ -617,6 +617,7 @@ pub enum ExportSubmitStatus {
     RecoveryRequired,
     DestinationBusy,
     IdempotencyConflict,
+    RetiredRequest,
 }
 impl ExportSubmitStatus {
     pub fn wire(self) -> i64 { match self {
@@ -629,6 +630,7 @@ impl ExportSubmitStatus {
         Self::RecoveryRequired => 7,
         Self::DestinationBusy => 8,
         Self::IdempotencyConflict => 9,
+        Self::RetiredRequest => 10,
     } }
     pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
         1 => Self::Accepted,
@@ -640,6 +642,7 @@ impl ExportSubmitStatus {
         7 => Self::RecoveryRequired,
         8 => Self::DestinationBusy,
         9 => Self::IdempotencyConflict,
+        10 => Self::RetiredRequest,
         _ => return Err(DecodeError::UnknownEnum { enum_name: "ExportSubmitStatus", value: v }),
     }) }
 }
@@ -666,17 +669,20 @@ pub enum ExportLookupStatus {
     #[default] Found,
     Unavailable,
     StaleContext,
+    RetiredRequest,
 }
 impl ExportLookupStatus {
     pub fn wire(self) -> i64 { match self {
         Self::Found => 1,
         Self::Unavailable => 2,
         Self::StaleContext => 3,
+        Self::RetiredRequest => 4,
     } }
     pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
         1 => Self::Found,
         2 => Self::Unavailable,
         3 => Self::StaleContext,
+        4 => Self::RetiredRequest,
         _ => return Err(DecodeError::UnknownEnum { enum_name: "ExportLookupStatus", value: v }),
     }) }
 }

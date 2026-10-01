@@ -171,6 +171,7 @@ class ExportSubmitStatus(Enum):
     recovery_required = 7
     destination_busy = 8
     idempotency_conflict = 9
+    retired_request = 10
 
 class ExportDestinationPolicy(Enum):
     fail_if_exists = 1
@@ -180,6 +181,7 @@ class ExportLookupStatus(Enum):
     found = 1
     unavailable = 2
     stale_context = 3
+    retired_request = 4
 
 class ExportJobState(Enum):
     queued = 1

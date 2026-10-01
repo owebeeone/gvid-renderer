@@ -27,6 +27,10 @@ GOLDEN_SHA256 = {
     "cancel_export_job": ("CancelExportJob", "f5628b82f135ad562d0c361bb0bad9c48692be422b3dca61c2083208b720db9e"),
     "export_lookup_query": ("ExportLookupQuery", "6e0859ac33824e32ec7f1db297f77510e5dfd43f22bea258173212c9d8458565"),
     "export_lookup_result": ("ExportLookupResult", "c573a0b96c91a5b73b9650206eee87208239f30496c4ebc9598376c998c29c53"),
+    "export_job_request_standalone": ("ExportJobRequest", "d26bd70b5f7488dd8626a4ebb243b7f45653ade049e62ad6e33fd32226de3dfe"),
+    "export_job_ack_retired": ("ExportJobAck", "a4eb254d6062b85609025f03b592baca4ed9ef0986486dac90fb66ef5acb696b"),
+    "export_lookup_query_standalone": ("ExportLookupQuery", "4bdfde9d79c7604be6048eeaefb880ab9195fcad71d3a583349eff014e3a855e"),
+    "export_lookup_retired": ("ExportLookupResult", "d8f1192749613482cf88a1a68c3af833d83f0d31424e9cca039f44b5df95aca0"),
 }
 
 
@@ -287,6 +291,13 @@ class TautContractTest(unittest.TestCase):
                 "allow_software_fallback": True,
                 "destination_policy": "replace_existing",
             })
+        standalone_request = fixture("export_job_request_standalone")
+        self.assertEqual(standalone_request["context"]["provenance"],
+                         "standalone_import")
+        self.assertIsNone(standalone_request["context"]["authority_incarnation_id"])
+        self.assertEqual(standalone_request["context"]["local_import_id"],
+                         "import-1")
+        self.round_trip("ExportJobRequest", standalone_request)
         self.round_trip("ExportJobAck", {
             "contract_version": 1, "context": host_context,
             "status": "accepted", "job_id": "job-a",
@@ -352,6 +363,19 @@ class TautContractTest(unittest.TestCase):
             "request_id": "not-visible", "status": "unavailable",
             "snapshot": None, "diagnostic_id": None,
         })
+        retired_ack = fixture("export_job_ack_retired")
+        self.assertEqual(retired_ack["status"], "retired_request")
+        self.assertIsNone(retired_ack["job_id"])
+        self.assertFalse(retired_ack["replayed"])
+        self.round_trip("ExportJobAck", retired_ack)
+        standalone_lookup = fixture("export_lookup_query_standalone")
+        self.assertIsNone(standalone_lookup["caller_incarnation_id"])
+        self.assertEqual(standalone_lookup["local_import_id"], "import-1")
+        self.round_trip("ExportLookupQuery", standalone_lookup)
+        retired_lookup = fixture("export_lookup_retired")
+        self.assertEqual(retired_lookup["status"], "retired_request")
+        self.assertIsNone(retired_lookup["snapshot"])
+        self.round_trip("ExportLookupResult", retired_lookup)
         self.round_trip("CancelExportJob", {
             "contract_version": 1, "project_id": "p1", "job_id": "job-b",
             "command_id": "cancel-b", "caller_incarnation_id": "open-1",

@@ -1,0 +1,22 @@
+{
+  "contract_version": 1,
+  "context": {
+    "request_id": "export-a",
+    "provenance": "governed_host",
+    "project_id": "p1",
+    "graph_id": "g1",
+    "sequence_id": "s1",
+    "authority_incarnation_id": "open-2",
+    "local_import_id": null,
+    "accepted_revision": 9,
+    "binding_set_id": "bind-2",
+    "binding_revision": 2,
+    "profile_id": "web-h264",
+    "profile_version": 3,
+    "profile_digest": "sha256:profile-v3"
+  },
+  "status": "retired_request",
+  "job_id": null,
+  "replayed": false,
+  "diagnostic_id": null
+}
