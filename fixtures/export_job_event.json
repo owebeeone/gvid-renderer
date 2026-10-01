@@ -33,7 +33,8 @@
       "audio_sample_rate": 48000,
       "audio_channel_layout": "stereo"
     },
-    "output_probe_digest": "sha256:probe-a"
+    "output_probe_digest": "sha256:probe-a",
+    "destination_generation_id": "generation-a"
   },
   "diagnostic_id": null
 }

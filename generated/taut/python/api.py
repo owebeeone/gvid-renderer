@@ -169,6 +169,17 @@ class ExportSubmitStatus(Enum):
     unsupported = 5
     capacity = 6
     recovery_required = 7
+    destination_busy = 8
+    idempotency_conflict = 9
+
+class ExportDestinationPolicy(Enum):
+    fail_if_exists = 1
+    replace_existing = 2
+
+class ExportLookupStatus(Enum):
+    found = 1
+    unavailable = 2
+    stale_context = 3
 
 class ExportJobState(Enum):
     queued = 1
@@ -750,6 +761,7 @@ class ExportJobRequest:
     range: TimeRange
     destination_ref: str
     allow_software_fallback: bool
+    destination_policy: ExportDestinationPolicy
 
 @dataclass(slots=True)
 class ExportJobAck:
@@ -776,6 +788,7 @@ class ExportResult:
     output_artifact_id: str
     probe_summary: ExportProbeSummary
     output_probe_digest: str
+    destination_generation_id: str
 
 @dataclass(slots=True)
 class ExportJobEvent:
@@ -806,6 +819,23 @@ class ExportStatusSnapshot:
     state: ExportJobState
     last_event_sequence: int
     result: ExportResult | None
+    diagnostic_id: str | None
+
+@dataclass(slots=True)
+class ExportLookupQuery:
+    contract_version: int
+    project_id: str
+    request_id: str
+    caller_incarnation_id: str | None
+    local_import_id: str | None
+
+@dataclass(slots=True)
+class ExportLookupResult:
+    contract_version: int
+    project_id: str
+    request_id: str
+    status: ExportLookupStatus
+    snapshot: ExportStatusSnapshot | None
     diagnostic_id: str | None
 
 @dataclass(slots=True)

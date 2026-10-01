@@ -9,6 +9,8 @@ impl<'a> ExportJobsClient<'a> {
     pub fn new(c: &'a Client) -> Self { Self { c } }
     // export.submit(request) -> ExportJobAck
     // self.c.call("export.submit", &[..encode args..]).await -> ExportJobAck::from_cbor(..)
+    // export.lookup(request) -> ExportLookupResult
+    // self.c.call("export.lookup", &[..encode args..]).await -> ExportLookupResult::from_cbor(..)
     // export.events: subscribe ("log") -> stream of ['append']
     // export.status(request) -> ExportStatusSnapshot
     // self.c.call("export.status", &[..encode args..]).await -> ExportStatusSnapshot::from_cbor(..)

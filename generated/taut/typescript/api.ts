@@ -25,7 +25,9 @@ export type AuthorityState = "ready" | "read_only_future_version" | "recovery_re
 export type LeaseStatus = "granted" | "held_by_other" | "stale_incarnation" | "read_only" | "recovery_required";
 export type ResourceActionStatus = "accepted" | "unknown" | "expired" | "unauthorized";
 export type ExportProvenance = "governed_host" | "standalone_import";
-export type ExportSubmitStatus = "accepted" | "stale_context" | "invalid" | "unauthorized" | "unsupported" | "capacity" | "recovery_required";
+export type ExportSubmitStatus = "accepted" | "stale_context" | "invalid" | "unauthorized" | "unsupported" | "capacity" | "recovery_required" | "destination_busy" | "idempotency_conflict";
+export type ExportDestinationPolicy = "fail_if_exists" | "replace_existing";
+export type ExportLookupStatus = "found" | "unavailable" | "stale_context";
 export type ExportJobState = "queued" | "preparing" | "running" | "verifying" | "succeeded" | "failed" | "cancelled" | "interrupted";
 export type ExportEventKind = "ready" | "state_change" | "progress" | "warning" | "heartbeat" | "recovery_required";
 export type ExportCancelStatus = "accepted" | "already_terminal" | "unknown" | "unauthorized" | "stale_context";
@@ -584,6 +586,7 @@ export interface ExportJobRequest {
   range: TimeRange;
   destination_ref: string;
   allow_software_fallback: boolean;
+  destination_policy: ExportDestinationPolicy;
 }
 
 export interface ExportJobAck {
@@ -610,6 +613,7 @@ export interface ExportResult {
   output_artifact_id: string;
   probe_summary: ExportProbeSummary;
   output_probe_digest: string;
+  destination_generation_id: string;
 }
 
 export interface ExportJobEvent {
@@ -640,6 +644,23 @@ export interface ExportStatusSnapshot {
   state: ExportJobState;
   last_event_sequence: bigint;
   result: ExportResult | null;
+  diagnostic_id: string | null;
+}
+
+export interface ExportLookupQuery {
+  contract_version: bigint;
+  project_id: string;
+  request_id: string;
+  caller_incarnation_id: string | null;
+  local_import_id: string | null;
+}
+
+export interface ExportLookupResult {
+  contract_version: bigint;
+  project_id: string;
+  request_id: string;
+  status: ExportLookupStatus;
+  snapshot: ExportStatusSnapshot | null;
   diagnostic_id: string | null;
 }
 

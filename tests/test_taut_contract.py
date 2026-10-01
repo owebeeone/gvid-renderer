@@ -22,9 +22,11 @@ GOLDEN_SHA256 = {
     "ripple_insert_batch": ("EditBatch", "39ef319a92accd070e5f29f163ab8678ccf2a4020dfaf9a85fd78dc47cb913f0"),
     "insert_source_span": ("InsertSourceSpan", "4cff483f8ee8f66a6ef3777d72f04c6791c25cf12c5a31898a1b942c24b32e25"),
     "insert_new_asset": ("InsertSourceSpan", "cd73757f7e0681ccc4e7665adb90b635e099f07034e48846441a7d6c13364bf4"),
-    "export_job_request": ("ExportJobRequest", "58369f219704c4bd8e813411d1801733af999aa90e1b9628dadbc69709415887"),
-    "export_job_event": ("ExportJobEvent", "e9bfc9247e9ee5e82662e6fa10395b2a36e14981253592ee2634f6a07d728100"),
+    "export_job_request": ("ExportJobRequest", "eb2e9d01be0c6212f12fcedb9fd69177da3e309149af7bfe1fd46a21b4d16c2a"),
+    "export_job_event": ("ExportJobEvent", "ed4b8743f6bfaa40910c3b11bc1ac79497e4cf00ba636048bd8895942f12b985"),
     "cancel_export_job": ("CancelExportJob", "f5628b82f135ad562d0c361bb0bad9c48692be422b3dca61c2083208b720db9e"),
+    "export_lookup_query": ("ExportLookupQuery", "6e0859ac33824e32ec7f1db297f77510e5dfd43f22bea258173212c9d8458565"),
+    "export_lookup_result": ("ExportLookupResult", "c573a0b96c91a5b73b9650206eee87208239f30496c4ebc9598376c998c29c53"),
 }
 
 
@@ -283,6 +285,7 @@ class TautContractTest(unittest.TestCase):
                           "end": {"numerator": 2, "denominator": 1}},
                 "destination_ref": "opaque-destination-1",
                 "allow_software_fallback": True,
+                "destination_policy": "replace_existing",
             })
         self.round_trip("ExportJobAck", {
             "contract_version": 1, "context": host_context,
@@ -294,6 +297,12 @@ class TautContractTest(unittest.TestCase):
             "status": "accepted", "job_id": "job-a",
             "replayed": True, "diagnostic_id": None,
         })
+        for status in ("destination_busy", "idempotency_conflict"):
+            self.round_trip("ExportJobAck", {
+                "contract_version": 1, "context": other_context,
+                "status": status, "job_id": None,
+                "replayed": False, "diagnostic_id": "rejected",
+            })
         result = {
             "export_record_id": "record-a", "output_artifact_id": "artifact-a",
             "probe_summary": {
@@ -303,6 +312,7 @@ class TautContractTest(unittest.TestCase):
                 "audio_channel_layout": "stereo",
             },
             "output_probe_digest": "sha256:probe-a",
+            "destination_generation_id": "generation-a",
         }
         for sequence, kind, state, progress, event_result in (
             (0, "ready", "queued", None, None),
@@ -320,11 +330,27 @@ class TautContractTest(unittest.TestCase):
             "contract_version": 1, "project_id": "p1", "job_id": "job-a",
             "caller_incarnation_id": "open-2", "local_import_id": None,
         })
-        self.round_trip("ExportStatusSnapshot", {
+        status_snapshot = {
             "contract_version": 1, "context": host_context,
             "job_id": "job-a", "state": "succeeded",
             "last_event_sequence": 2, "result": result,
             "diagnostic_id": None,
+        }
+        self.round_trip("ExportStatusSnapshot", status_snapshot)
+        self.round_trip("ExportLookupQuery", {
+            "contract_version": 1, "project_id": "p1",
+            "request_id": "export-a", "caller_incarnation_id": "open-2",
+            "local_import_id": None,
+        })
+        self.round_trip("ExportLookupResult", {
+            "contract_version": 1, "project_id": "p1",
+            "request_id": "export-a", "status": "found",
+            "snapshot": status_snapshot, "diagnostic_id": None,
+        })
+        self.round_trip("ExportLookupResult", {
+            "contract_version": 1, "project_id": "p1",
+            "request_id": "not-visible", "status": "unavailable",
+            "snapshot": None, "diagnostic_id": None,
         })
         self.round_trip("CancelExportJob", {
             "contract_version": 1, "project_id": "p1", "job_id": "job-b",

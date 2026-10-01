@@ -20,5 +20,6 @@
     "end": {"numerator": 2, "denominator": 1}
   },
   "destination_ref": "opaque-destination-1",
-  "allow_software_fallback": true
+  "allow_software_fallback": true,
+  "destination_policy": "replace_existing"
 }

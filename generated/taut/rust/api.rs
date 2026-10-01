@@ -615,6 +615,8 @@ pub enum ExportSubmitStatus {
     Unsupported,
     Capacity,
     RecoveryRequired,
+    DestinationBusy,
+    IdempotencyConflict,
 }
 impl ExportSubmitStatus {
     pub fn wire(self) -> i64 { match self {
@@ -625,6 +627,8 @@ impl ExportSubmitStatus {
         Self::Unsupported => 5,
         Self::Capacity => 6,
         Self::RecoveryRequired => 7,
+        Self::DestinationBusy => 8,
+        Self::IdempotencyConflict => 9,
     } }
     pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
         1 => Self::Accepted,
@@ -634,7 +638,46 @@ impl ExportSubmitStatus {
         5 => Self::Unsupported,
         6 => Self::Capacity,
         7 => Self::RecoveryRequired,
+        8 => Self::DestinationBusy,
+        9 => Self::IdempotencyConflict,
         _ => return Err(DecodeError::UnknownEnum { enum_name: "ExportSubmitStatus", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum ExportDestinationPolicy {
+    #[default] FailIfExists,
+    ReplaceExisting,
+}
+impl ExportDestinationPolicy {
+    pub fn wire(self) -> i64 { match self {
+        Self::FailIfExists => 1,
+        Self::ReplaceExisting => 2,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::FailIfExists,
+        2 => Self::ReplaceExisting,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "ExportDestinationPolicy", value: v }),
+    }) }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub enum ExportLookupStatus {
+    #[default] Found,
+    Unavailable,
+    StaleContext,
+}
+impl ExportLookupStatus {
+    pub fn wire(self) -> i64 { match self {
+        Self::Found => 1,
+        Self::Unavailable => 2,
+        Self::StaleContext => 3,
+    } }
+    pub fn from_wire(v: i64) -> Result<Self, DecodeError> { Ok(match v {
+        1 => Self::Found,
+        2 => Self::Unavailable,
+        3 => Self::StaleContext,
+        _ => return Err(DecodeError::UnknownEnum { enum_name: "ExportLookupStatus", value: v }),
     }) }
 }
 
@@ -3121,6 +3164,7 @@ pub struct ExportJobRequest {
     pub range: TimeRange,
     pub destination_ref: String,
     pub allow_software_fallback: bool,
+    pub destination_policy: ExportDestinationPolicy,
     pub wire_residual: Vec<(i64, Cbor)>,
 }
 impl ExportJobRequest {
@@ -3133,6 +3177,7 @@ impl ExportJobRequest {
             (3, self.range.to_cbor()),
             (4, Cbor::Text(self.destination_ref.clone())),
             (5, Cbor::Bool(self.allow_software_fallback)),
+            (6, Cbor::Int(self.destination_policy.wire())),
         ];
         for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
         Cbor::Map(m)
@@ -3144,7 +3189,8 @@ impl ExportJobRequest {
             range: TimeRange::from_cbor(c.try_get(3)?)?,
             destination_ref: c.try_get(4)?.try_text()?,
             allow_software_fallback: c.try_get(5)?.try_bool()?,
-            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5)).map(|(t, v)| (*t, v.clone())).collect(),
+            destination_policy: ExportDestinationPolicy::from_wire(c.try_get(6)?.try_int()?)?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6)).map(|(t, v)| (*t, v.clone())).collect(),
         })
     }
     pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
@@ -3243,6 +3289,7 @@ pub struct ExportResult {
     pub output_artifact_id: String,
     pub probe_summary: ExportProbeSummary,
     pub output_probe_digest: String,
+    pub destination_generation_id: String,
     pub wire_residual: Vec<(i64, Cbor)>,
 }
 impl ExportResult {
@@ -3254,6 +3301,7 @@ impl ExportResult {
             (2, Cbor::Text(self.output_artifact_id.clone())),
             (3, self.probe_summary.to_cbor()),
             (4, Cbor::Text(self.output_probe_digest.clone())),
+            (5, Cbor::Text(self.destination_generation_id.clone())),
         ];
         for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
         Cbor::Map(m)
@@ -3264,7 +3312,8 @@ impl ExportResult {
             output_artifact_id: c.try_get(2)?.try_text()?,
             probe_summary: ExportProbeSummary::from_cbor(c.try_get(3)?)?,
             output_probe_digest: c.try_get(4)?.try_text()?,
-            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4)).map(|(t, v)| (*t, v.clone())).collect(),
+            destination_generation_id: c.try_get(5)?.try_text()?,
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5)).map(|(t, v)| (*t, v.clone())).collect(),
         })
     }
     pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
@@ -3400,6 +3449,85 @@ impl ExportStatusSnapshot {
             result: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(ExportResult::from_cbor(v)?) } },
             diagnostic_id: { let v = c.try_get(7)?; if v.is_null() { None } else { Some(v.try_text()?) } },
             wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6 | 7)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct ExportLookupQuery {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub request_id: String,
+    pub caller_incarnation_id: Option<String>,
+    pub local_import_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl ExportLookupQuery {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.request_id.clone())),
+            (4, match &self.caller_incarnation_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+            (5, match &self.local_import_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            request_id: c.try_get(3)?.try_text()?,
+            caller_incarnation_id: { let v = c.try_get(4)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            local_import_id: { let v = c.try_get(5)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5)).map(|(t, v)| (*t, v.clone())).collect(),
+        })
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
+        Self::from_cbor(&crate::cbor::try_decode_with(bytes, Self::MAX_DEPTH, Self::MAX_ENCODED_LEN)?)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct ExportLookupResult {
+    pub contract_version: i64,
+    pub project_id: String,
+    pub request_id: String,
+    pub status: ExportLookupStatus,
+    pub snapshot: Option<ExportStatusSnapshot>,
+    pub diagnostic_id: Option<String>,
+    pub wire_residual: Vec<(i64, Cbor)>,
+}
+impl ExportLookupResult {
+    pub const MAX_DEPTH: usize = 16;
+    pub const MAX_ENCODED_LEN: Option<usize> = Some(16777216);
+    pub fn to_cbor(&self) -> Cbor {
+        let mut m = vec![
+            (1, Cbor::Int(self.contract_version)),
+            (2, Cbor::Text(self.project_id.clone())),
+            (3, Cbor::Text(self.request_id.clone())),
+            (4, Cbor::Int(self.status.wire())),
+            (5, match &self.snapshot { Some(v) => v.to_cbor(), None => Cbor::Null }),
+            (6, match &self.diagnostic_id { Some(v) => Cbor::Text(v.clone()), None => Cbor::Null }),
+        ];
+        for (t, v) in &self.wire_residual { m.push((*t, v.clone())); }
+        Cbor::Map(m)
+    }
+    pub fn from_cbor(c: &Cbor) -> Result<Self, DecodeError> {
+        Ok(Self {
+            contract_version: c.try_get(1)?.try_int()?,
+            project_id: c.try_get(2)?.try_text()?,
+            request_id: c.try_get(3)?.try_text()?,
+            status: ExportLookupStatus::from_wire(c.try_get(4)?.try_int()?)?,
+            snapshot: { let v = c.try_get(5)?; if v.is_null() { None } else { Some(ExportStatusSnapshot::from_cbor(v)?) } },
+            diagnostic_id: { let v = c.try_get(6)?; if v.is_null() { None } else { Some(v.try_text()?) } },
+            wire_residual: c.map_entries().iter().filter(|(t, _)| !matches!(*t, 1 | 2 | 3 | 4 | 5 | 6)).map(|(t, v)| (*t, v.clone())).collect(),
         })
     }
     pub fn decode(bytes: &[u8]) -> Result<Self, DecodeError> {
