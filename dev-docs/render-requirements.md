@@ -3,7 +3,7 @@
 **Status:** Initial draft
 **Scope:** Portable edit graph contract, renderer-facing edit commands, interactive preview rendering, and batch export in the gvid-renderer member
 **Source:** [Product and system requirements](../../dev-docs/gvid-requirements.md)
-**Related:** [High-level architecture](../../dev-docs/gvid-arch.md)
+**Related:** [High-level architecture](../../dev-docs/gvid-arch.md), [Taut protocol](https://github.com/owebeeone/taut)
 
 ## Purpose
 
@@ -11,7 +11,22 @@ This document translates the GVid product baseline into requirements for the ren
 
 The renderer consumes validated project, asset, effect, audio, color, job, and capability contracts. The project service owns canonical editorial state and acceptance of UI edits. A portable edit graph expresses that state for sharing and repeatable rendering; a normalized render plan and native tool commands are derived execution artifacts. The renderer does not change source media.
 
+All structured messages crossing GVid component boundaries use governed Taut contracts and wire. Encoded media bytes remain opaque payloads served through the authenticated HTTP range endpoint; Taut governs resource descriptors and control messages. Taut is a candidate for the portable graph file format, subject to an explicit schema and performance decision.
+
 ## Requirements
+
+### Taut communication and graph-format evaluation
+
+| ID | Requirement | Baseline |
+| --- | --- | --- |
+| GVR-RDR-056 | Every structured renderer-related message crossing the browser, host, renderer, media service, or supervised sidecar boundary MUST be defined by a versioned Taut message and service contract and encoded on the Taut wire. This includes edit commands and acknowledgements, graph snapshots and changes, asset bindings, preview requests and results, job progress, cancellation, warnings, errors, and export results. | GVR-CON-007; GVR-REND-016 |
+| GVR-RDR-057 | Each Taut method MUST declare delivery semantics appropriate to its use. The protocol design MUST choose and document request/response and stream shapes, ordering, replay or latest-value behavior, backpressure, cancellation, and recovery; it MUST NOT create an untyped JSON or shell-command bypass. | GVR-CON-007-008; GVR-NFR-SEC-001-005 |
+| GVR-RDR-058 | Taut envelopes MUST carry the applicable schema/capability version, request or command ID, project and sequence identity, accepted revision, asset-binding version, and result fidelity so receivers can reject stale or incompatible results. | GVR-CON-008; GVR-PREV-009; GVR-RDR-034,041 |
+| GVR-RDR-059 | Taut decoding at every privileged boundary MUST enforce declared size and nesting limits and validate identifiers, exact time fields, node parameters, and resource access before scheduling work. Unsupported required semantics MUST fail explicitly under a documented compatibility policy. | GVR-CON-008; GVR-NFR-SEC-005; GVR-RDR-026 |
+| GVR-RDR-060 | The Taut schema, compiler/runtime version, and golden wire corpus used by GVid MUST be pinned. Browser and native implementations MUST pass cross-language encode/decode, version evolution, malformed-input, and request-correlation tests for the GVid contracts. | GVR-CON-008; GVR-NFR-MNT-004 |
+| GVR-RDR-061 | Before the portable graph format is frozen, the design MUST evaluate a Taut schema and deterministic wire as the saved graph representation. The evaluation MUST test typed node variants, exact time, graph depth and size, deterministic identity, incremental snapshot/change exchange, schema evolution, asset rebinding, and browser/native round trips. The chosen format and reasons MUST be recorded. | GVR-REND-015; GVR-RDR-023-032 |
+| GVR-RDR-062 | If the saved graph uses Taut, it MUST carry a durable schema version and migration path. If another saved format is chosen, its graph snapshots and changes crossing GVid component boundaries MUST map to Taut messages without silent semantic loss. | GVR-REND-015-016; GVR-NFR-MNT-004 |
+| GVR-RDR-063 | Taut messages MUST issue opaque media resource descriptors and convey related status and errors. Encoded video and audio bytes MAY remain raw byte ranges over the authenticated loopback HTTP endpoint; it MUST NOT expose an alternative application control API. | GVR-CON-009; GVR-NFR-SEC-004 |
 
 ### Portable edit graph and asset bindings
 
@@ -35,8 +50,8 @@ The first schema design should define these records and their compatibility rule
 | Graph header | Schema version, graph identity, revision identity, sequence roots, and semantic feature versions. |
 | Sequence and node | Stable IDs, typed operation, input and output ports, ordered layer or track placement, exact time ranges, and versioned parameters. |
 | Asset slot and binding | Logical asset ID, selected streams, expected source properties and fingerprint, plus a separately replaceable local binding. |
-| Render request | Graph revision, binding set, sequence, requested time or range, quality/fidelity target, profile, priority, and request identity. |
-| Render result | Request identity and revision, actual time range, fidelity, artifact identity, warnings, diagnostics, and completion state. |
+| Render request | Taut message carrying graph revision, binding set, sequence, requested time or range, quality/fidelity target, profile, priority, and request identity. |
+| Render result | Taut message carrying request identity and revision, actual time range, fidelity, artifact identity, warnings, diagnostics, and completion state. |
 
 ### Browser and editor mutations
 
@@ -133,6 +148,10 @@ These are required checks for implementation; this draft does not claim they hav
 15. Compare an on-demand range render with the same interval in the full software reference export, including a transition crossing the range boundary.
 16. Run a batch with multiple profiles and asset binding sets while playing the timeline. Check job isolation, fair resource scheduling, verified outputs, and safe retry of an interrupted item.
 
+17. Exchange representative edit, seek, cancellation, progress, and export messages between the browser and native runtimes using the pinned Taut schema; compare canonical wire bytes and decoded meaning.
+18. Send malformed, oversized, too-deep, stale-revision, and future-version Taut messages. Confirm bounded failure, no privileged action, and a correlated diagnostic.
+19. Evaluate a large layered graph with asset rebinding and incremental changes as a Taut saved document. Record size, decode cost, deterministic identity, migration behavior, and any reason to use a different durable format.
+
 ## Open decisions and dependencies
 
 - The initial operating systems, accepted source envelope, output profiles, working/output color policy, audio layouts, and reference performance budgets are product decisions in the [baseline](../../dev-docs/gvid-requirements.md).
@@ -142,3 +161,4 @@ These are required checks for implementation; this draft does not claim they hav
 
 - The graph schema design must settle node and port types, canonical serialization, version migration, nested sequence expansion, and the exact asset substitution policies. These decisions must preserve the renderer-neutral contract above.
 - The preview and jobs designs must set prefetch policy, latency budgets, and fairness thresholds on named reference hardware. The render model design must settle safe partition boundaries and reuse rules for batch work.
+- The Taut graph-format evaluation must decide whether the durable file itself uses Taut. The communication boundary remains Taut in either case.
