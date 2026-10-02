@@ -1,6 +1,6 @@
 # GVid Render Engine Design
 
-**Status:** Draft design; the [render-engine review decision](render-engine-design-ReviewDecision.md) remains NO-GO. The [ExportJobs lifecycle amendment](export-jobs-lifecycle-design.md) and separate [owner-scoped namespace design](export-jobs-owner-scope-design.md) are draft review objects that revise ExportJobs admission, replay and retirement. Neither is accepted until the new owner-scope review gate reports GO.
+**Status:** Draft design; the [render-engine review decision](render-engine-design-ReviewDecision.md) remains NO-GO. The [ExportJobs lifecycle amendment](export-jobs-lifecycle-design.md) remains a draft with its own NO-GO decision. The separate [owner-scoped namespace design](export-jobs-owner-scope-design.md), which revises ExportJobs admission, replay and authority, was accepted as a draft contract shape at renderer `92d2610af38bb23f0b4f16fba627541ba56775d6`.
 **Scope:** Headless render library, pluggable media tools, asset resolution, and separate Glade and CLI clients.
 **Controls:** [renderer requirements](render-requirements.md), [flat graph and Taut design](render-graph-schema-design.md), [ExportJobs lifecycle amendment](export-jobs-lifecycle-design.md), [system architecture](../../dev-docs/gvid-arch.md), and [UI design v2](../../dev-docs/ui-design-v2.md).
 

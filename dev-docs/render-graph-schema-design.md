@@ -1,6 +1,6 @@
 # GVid flat render graph and Taut contracts (draft v0.2)
 
-**Status:** Draft design baseline for the first implementation. The governed schema is [`../ir/gvid_render_graph.taut.py`](../ir/gvid_render_graph.taut.py); regenerate Python, Rust and TypeScript with [`../regen-taut-protos.py`](../regen-taut-protos.py). The [ExportJobs lifecycle amendment](export-jobs-lifecycle-design.md) and [owner-scope design](export-jobs-owner-scope-design.md) jointly specify revised export admission, namespace, disclosure and retirement; their review gates are pending. This pass adopts [GVid Taut Proto Feedback](../../dev-docs/GvidTautProto-Feedback.md). No client consumes v0.1, so v0.2 is a direct revision, not a migration promise.
+**Status:** Draft design baseline for the first implementation. The governed schema is [`../ir/gvid_render_graph.taut.py`](../ir/gvid_render_graph.taut.py); regenerate Python, Rust and TypeScript with [`../regen-taut-protos.py`](../regen-taut-protos.py). The [ExportJobs lifecycle amendment](export-jobs-lifecycle-design.md) remains draft NO-GO, while the [owner-scope design](export-jobs-owner-scope-design.md) was accepted as a draft contract shape at renderer `92d2610af38bb23f0b4f16fba627541ba56775d6`; together they specify revised export admission, namespace, disclosure and retirement. This pass adopts [GVid Taut Proto Feedback](../../dev-docs/GvidTautProto-Feedback.md). No client consumes v0.1, so v0.2 is a direct revision, not a migration promise.
 
 ## Decisions and ownership
 

@@ -1,6 +1,6 @@
 # ExportJobs Owner-Scoped Request Namespace Design
 
-**Status:** Draft new review object. This proposal resolves the open submit-disclosure finding in the [ExportJobs lifecycle review decision](export-jobs-lifecycle-design-ReviewDecision.md). It is not accepted until its own review gate reports GO.
+**Status:** Accepted as a draft contract shape at renderer `92d2610af38bb23f0b4f16fba627541ba56775d6` after [Consistency round 2](export-jobs-owner-scope-design-ReviewConsistency-3.md) and [Safety round 2](export-jobs-owner-scope-design-ReviewSafety-3.md) reported GO. See the [review decision](export-jobs-owner-scope-design-ReviewDecision.md). This does not claim a running host implementation.
 **Scope:** Governed-host ExportJobs request identity and authorization. It amends the namespace, submit, replay, lookup, and tombstone rules in [ExportJobs lifecycle and provenance design](export-jobs-lifecycle-design.md), [render engine design](render-engine-design.md), [graph schema design](render-graph-schema-design.md), and the draft Taut wire. The offline CLI import namespace, render plan, media bytes, destination publication, and journal reserve remain governed by their existing drafts.
 **Compatibility:** ExportJobs is a draft version 1 contract with no deployed reader or writer. The new optional wire fields are required or forbidden by provenance-specific semantic validation; their optional encoding preserves the existing field tags. No production compatibility or migration claim is made.
 
