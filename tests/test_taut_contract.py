@@ -256,12 +256,15 @@ class TautContractTest(unittest.TestCase):
             "fidelity": "exact", "max_edge_px": 1280,
         }
         self.round_trip("SequencePreviewRequest", sequence_request)
-        self.round_trip("SequencePreviewResult", {
+        sequence_result = {
             **{k: v for k, v in sequence_request.items() if k not in ("at", "max_edge_px")},
             "status": "ready", "actual_time": sequence_request["at"],
             "plan_id": "plan-1", "resource": resource,
             "error_code": None, "diagnostic_id": None,
-        })
+        }
+        self.assertEqual(sequence_result["accepted_revision"], 9)
+        self.assertEqual(sequence_result["binding_set_id"], "bind-2")
+        self.round_trip("SequencePreviewResult", sequence_result)
         source_request = {
             "contract_version": 1, "project_id": "p1",
             "authority_incarnation_id": "open-1",
@@ -274,13 +277,20 @@ class TautContractTest(unittest.TestCase):
         }
         self.assertNotIn("graph_id", source_request)
         self.round_trip("SourcePreviewRequest", source_request)
-        self.round_trip("SourcePreviewResult", {
+        source_result = {
             **{k: v for k, v in source_request.items()
                if k not in ("at", "max_edge_px", "expected_content_fingerprint")},
             "status": "ready", "actual_time": source_request["at"],
             "resource": resource, "error_code": None, "diagnostic_id": None,
             "content_fingerprint": "sha256:different-bytes",
-        })
+        }
+        for graph_field in ("graph_id", "sequence_id", "accepted_revision",
+                            "binding_set_id", "binding_revision"):
+            self.assertNotIn(graph_field, source_result)
+        self.assertEqual(source_result["asset_version_id"], "asset-2-v1")
+        self.assertEqual(source_result["content_fingerprint"],
+                         source_request["expected_content_fingerprint"])
+        self.round_trip("SourcePreviewResult", source_result)
 
     def test_export_job_wire_context_and_recovery_shapes(self) -> None:
         host_context = {
